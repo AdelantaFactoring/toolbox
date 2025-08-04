@@ -1,0 +1,17 @@
+# Incluir archivos de documentación
+include README.md
+include LICENSE
+include ARCHITECTURE_GUIDE.md
+include requirements.txt
+
+# Incluir configuraciones
+recursive-include toolbox/config *.py *.yml *.yaml *.json
+
+# Incluir schemas
+recursive-include toolbox/schemas *.py
+
+# Excluir archivos de test del paquete distribuible
+prune test/
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.orig
