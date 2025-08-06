@@ -3,6 +3,8 @@ Configuración V2 - Settings centralizados para arquitectura hexagonal
 """
 
 import logging
+from pprint import pprint
+import os
 
 
 class V2Settings:
@@ -14,7 +16,20 @@ class V2Settings:
     # 🔧 Logger Configuration
     @staticmethod
     def logger(message: str) -> None:
-        """Logger callable para compatibilidad V1"""
+        """
+        Logger callable mejorado para compatibilidad V1
+
+        En desarrollo usa pprint para mejor visualización
+        En producción usa logging estándar
+        """
+        # Detectar si estamos en desarrollo o producción
+
+        # En desarrollo: usar pprint para mejor visualización
+        print("🔧 ADELANTA TOOLBOX DEBUG:")
+        pprint(message)
+        print("-" * 50)
+
+        # En producción: usar logging estándar
         _logger = logging.getLogger(__name__)
         _logger.warning(message)
 

@@ -216,18 +216,35 @@ class KPITransformer(BaseTransformer):
     def _mapear_ejecutivos(
         self, df_in: pd.DataFrame, df_out: pd.DataFrame, threshold: int = 75
     ) -> Dict[str, str]:
-        """Mapea nombres de ejecutivos usando fuzzy matching"""
+        """
+        Mapea nombres de ejecutivos usando fuzzy matching
+
+        CORREGIDO: Ahora mantiene los nombres originales de df_out cuando no hay match suficiente
+        en lugar de transformarlos incorrectamente
+        """
         nombres_in = df_in["Ejecutivo"].str.lower().tolist()
         mapping = {}
 
-        for name_out in df_out["Ejecutivo"]:
-            lo = name_out.lower()
-            best = process.extractOne(lo, nombres_in, scorer=fuzz.partial_ratio)
+        for name_out in df_out["Ejecutivo"].unique():
+            name_out_lower = name_out.lower()
+            best = process.extractOne(
+                name_out_lower, nombres_in, scorer=fuzz.partial_ratio
+            )
+
             if best and best[1] >= threshold:
-                matched = df_in.loc[nombres_in.index(best[0]), "Ejecutivo"]
-                mapping[name_out] = matched
+                # Encontrar el nombre original que corresponde al match
+                idx_matched = nombres_in.index(best[0])
+                matched_original = df_in.iloc[idx_matched]["Ejecutivo"]
+                mapping[name_out] = matched_original
+                logger(
+                    f"Mapeo ejecutivo: '{name_out}' -> '{matched_original}' (score: {best[1]})"
+                )
             else:
-                mapping[name_out] = name_out.title()
+                # CORREGIDO: Mantener el nombre original en lugar de hacer .title()
+                mapping[name_out] = name_out
+                logger(
+                    f"Sin mapeo suficiente para '{name_out}' (mejor score: {best[1] if best else 0}), manteniendo original"
+                )
 
         return mapping
 

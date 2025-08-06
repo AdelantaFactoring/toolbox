@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adelanta-toolbox"
-version = "2.0.0"
+version = "0.5.0"
 description = "Librería con arquitectura hexagonal para procesos financieros ETL"
 readme = "README.md"
 license = {file = "LICENSE"}
