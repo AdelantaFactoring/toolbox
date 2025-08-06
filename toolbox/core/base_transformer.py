@@ -82,17 +82,17 @@ class BaseTransformer(Base):
         return "".join(c for c in nf if unicodedata.category(c) != "Mn").lower()
 
     def renombrar_columnas(
-        self, df: pd.DataFrame, mapping: Dict[str, str]
+        self, df: pd.DataFrame, mapping: Dict[str, str], normalize: bool = True
     ) -> pd.DataFrame:
         """
         Renombra columnas según mapping normalizado
         Migrado exacto desde BaseCalcular V1
         """
-        renames: Dict[str, str] = {}
-        for c in df.columns:
-            key = self._normalize(c)
-            if key in mapping:
-                renames[c] = mapping[key]
+        renames = {
+            c: mapping[self._normalize(c) if normalize else c]
+            for c in df.columns
+            if (self._normalize(c) if normalize else c) in mapping
+        }
         return df.rename(columns=renames)
 
     def formatear_fecha_mes(

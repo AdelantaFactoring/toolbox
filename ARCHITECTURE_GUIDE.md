@@ -1,57 +1,61 @@
-# 🏗️ Adelanta Factoring V2 - Arquitectura Hexagonal ESTRICTA
+# 🏗️ Adelanta Toolbox - Arquitectura Hexagonal MODERNA
 
-## 🚨 REGLAS NON-NEGOTIABLES DE MIGRACIÓN V2
+## 🚨 PRINCIPIOS ARQUITECTÓNICOS FUNDAMENTALES
 
-### ⚡ PRIORIDAD #1: COMPATIBILIDAD TOTAL
+### ⚡ OBJETIVO PRINCIPAL: ARQUITECTURA HEXAGONAL PURA
 
 ```
-V2 = REESTRUCTURACIÓN ARQUITECTÓNICA ÚNICAMENTE
-❌ NO cambiar lógica de negocio
-❌ NO modificar cálculos financieros
-❌ NO inventar validaciones nuevas
-❌ NO optimizar performance (aún)
-✅ SÍ copiar código exacto de V1
-✅ SÍ mantener mismas interfaces públicas
+Adelanta Toolbox = ARQUITECTURA HEXAGONAL MODERNA
+✅ SÍ implementar lógica de negocio optimizada
+✅ SÍ crear interfaces públicas elegantes
+✅ SÍ aplicar mejores prácticas de software
+✅ SÍ optimizar performance y mantenibilidad
+❌ NO copiar código legacy
+❌ NO mantener compatibilidad V1
 ```
 
-## 🎯 ARQUITECTURA HEXAGONAL V2 - 6 ARCHIVOS OBLIGATORIOS
+## 🎯 ARQUITECTURA HEXAGONAL - 6 ARCHIVOS OBLIGATORIOS
 
-Para **CADA** módulo `XxxCalcular.py` de V1, se deben crear **EXACTAMENTE 6 archivos**:
+Para **CADA** módulo de negocio, se deben crear **EXACTAMENTE 6 archivos**:
 
 ### 📁 Estructura Obligatoria
 
 ```
-v2/
-├── engines/xxx_engine.py              # ⚙️ Lógica V1 copiada exacta
-├── io/xxx_client.py                   # 📡 Cliente externo o placeholder
-├── schemas/xxx_schema.py              # 📊 Schema Pydantic con ConfigDict
+toolbox/
+├── engines/xxx_engine.py              # ⚙️ Lógica de negocio optimizada
+├── io/xxx_client.py                   # 📡 Cliente para fuentes externas
+├── schemas/xxx_schema.py              # 📊 Schema Pydantic robusto
 ├── processing/
-│   ├── transformers/xxx_transformer.py # 🔄 Transformer o placeholder
-│   └── validators/xxx_validator.py     # ✅ Validator o placeholder
-├── api/xxx_api.py                     # 🌐 API wrapper con interfaz V1
-└── test/test_xxx.py                   # 🧪 Test simple de compatibilidad
+│   ├── transformers/xxx_transformer.py # 🔄 Transformaciones de datos
+│   └── validators/xxx_validator.py     # ✅ Validación de datos
+├── api/xxx_api.py                     # 🌐 API pública elegante
+└── test/test_xxx.py                   # 🧪 Tests comprehensivos
 ```
 
-## 🔒 TEMPLATES OBLIGATORIOS EXACTOS
+## 🔒 TEMPLATES OBLIGATORIOS MODERNOS
 
 ### 1️⃣ **Engine** (Lógica de negocio)
 
 ```python
 """
 ⚙️ Xxx Engine V2
-LÓGICA COPIADA EXACTA DE XxxCalcular V1
+LÓGICA DE NEGOCIO OPTIMIZADA
 """
 
-class XxxEngine:
-    """Motor que contiene TODA la lógica de XxxCalcular V1"""
+try:
+    from ..core.base_engine import BaseEngine
+except ImportError:
+    raise ImportError("XxxEngine requiere BaseEngine de imports relativos")
+
+class XxxEngine(BaseEngine):
+    """Motor especializado que hereda de BaseEngine"""
 
     def __init__(self):
-        # Copiar inicialización de V1 si existe
-        pass
+        super().__init__()
 
-    def metodo_principal(self, param1, param2):
-        """COPIAR MÉTODO EXACTO DE V1"""
-        # TODO: Copiar línea por línea desde V1
+    def metodo_principal(self, data):
+        """Implementación optimizada de lógica de negocio"""
+        # Lógica de negocio específica del dominio
         pass
 ```
 
@@ -59,249 +63,346 @@ class XxxEngine:
 
 ```python
 """
-📡 Xxx Client V2 - Cliente especializado o Placeholder
-
-[Si NO tiene webservice]: Placeholder para mantener consistencia arquitectónica
-[Si SÍ tiene webservice]: Cliente que hereda de BaseClient
+📡 Xxx Client V2 - Cliente especializado para fuentes externas
 """
 
-# OPCIÓN A: Placeholder (cuando no hay webservice)
-pass
-
-# OPCIÓN B: Cliente real (cuando sí hay webservice)
 try:
     from ..core.base_client import BaseClient
+    from ..config.settings import V2Settings
 except ImportError:
-    raise ImportError("XxxClient V2 requiere BaseClient de imports relativos")
+    raise ImportError("XxxClient requiere BaseClient y V2Settings")
 
 class XxxClient(BaseClient):
+    """Cliente especializado para obtener datos externos"""
+
     def __init__(self):
         super().__init__(timeout=30)
-        # Configuración específica
+        self.url = V2Settings.GOOGLE_SHEETS_URLS["xxx"]
+
+    def fetch_xxx_data(self):
+        """Obtiene datos de fuente externa"""
+        try:
+            V2Settings.logger("Iniciando obtención de datos Xxx")
+            data = self.get_data_sync(self.url)
+            V2Settings.logger(f"Datos obtenidos: {len(data)} registros")
+            return data
+        except Exception as e:
+            V2Settings.logger(f"Error obteniendo datos: {e}")
+            raise
 ```
 
 ### 3️⃣ **Schema** (Validación Pydantic)
 
 ```python
 """
-📊 Schemas Pydantic V2 - Xxx
-Mantiene compatibilidad con v1 mientras mejora validación
+🏷️ Xxx Schema V2 - Validación robusta con Pydantic
 """
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+from datetime import datetime
 
 class XxxSchema(BaseModel):
-    """Schema base para Xxx"""
+    """Schema robusto para validación de datos Xxx"""
+
+    campo1: str = Field(..., description="Campo obligatorio")
+    campo2: datetime = Field(..., description="Campo fecha")
+    campo3: float = Field(..., gt=0, description="Campo numérico positivo")
+
+    @field_validator("campo2", mode="before")
+    @classmethod
+    def parsear_fecha(cls, v):
+        """Validador personalizado para fechas"""
+        if isinstance(v, str):
+            return datetime.strptime(v, "%d/%m/%Y")
+        return v
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    # [Si no hay campos específicos]: pass
-    # [Si sí hay campos]: definir campos con validadores
-
-# Alias para compatibilidad con v1
-XxxCalcularSchema = XxxSchema
 ```
 
 ### 4️⃣ **Transformer** (Procesamiento)
 
 ```python
 """
-🔄 Xxx Transformer V2 - Placeholder o Implementación
-
-Transformer especializado para procesamiento de datos de Xxx
+🔄 Xxx Transformer V2 - Transformaciones especializadas
 """
 
 try:
     from ...core.base_transformer import BaseTransformer
 except ImportError:
-    raise ImportError("XxxTransformer V2 requiere BaseTransformer de imports relativos")
+    raise ImportError("XxxTransformer requiere BaseTransformer")
 
 class XxxTransformer(BaseTransformer):
+    """Transformer especializado para datos Xxx"""
+
     def __init__(self):
         super().__init__()
+        self.column_mapping = {
+            "campo_origen": "CampoDestino",
+            "otro_campo": "OtroCampo"
+        }
 
-    pass  # Placeholder para futura implementación
+    def renombrar_columnas_xxx(self, df):
+        """Renombra columnas según mapping específico"""
+        return self.renombrar_columnas(df, self.column_mapping)
+
+    def procesar_datos_xxx(self, df):
+        """Procesamiento específico del dominio"""
+        # Transformaciones específicas
+        return df
 ```
 
 ### 5️⃣ **Validator** (Validación de datos)
 
 ```python
 """
-✅ Xxx Validator V2 - Placeholder o Implementación
-
-Validator especializado para validación de datos de Xxx
+✅ Xxx Validator V2 - Validación especializada
 """
 
 try:
     from ...core.base_validator import BaseValidator
+    from ...schemas.xxx_schema import XxxSchema
+    from ...config.settings import V2Settings
 except ImportError:
-    raise ImportError("XxxValidator V2 requiere BaseValidator de imports relativos")
+    raise ImportError("XxxValidator requiere dependencias")
 
 class XxxValidator(BaseValidator):
-    def __init__(self):
-        super().__init__()
+    """Validador especializado para Xxx"""
 
-    pass  # Placeholder para futura implementación
+    _cols_esperadas = ["CAMPO1", "CAMPO2", "CAMPO3"]
+
+    def __init__(self):
+        super().__init__(schema_class=XxxSchema)
+
+    def validar_columnas_xxx(self, df):
+        """Validación específica de columnas"""
+        self.validar_columnas(df, self._cols_esperadas)
+
+    def validar_schema_xxx(self, raw_data):
+        """Validación todo o nada con schema"""
+        V2Settings.logger(f"Validando schema Xxx: {len(raw_data)} registros")
+        validated_data = self.validar_schema(raw_data)
+        V2Settings.logger(f"Validación completada: {len(validated_data)} válidos")
+        return validated_data
 ```
 
 ### 6️⃣ **API** (Interfaz pública)
 
 ```python
 """
-🌐 API V2 - Xxx
-INTERFAZ IDÉNTICA A V1
+🌐 Xxx API V2 - Interfaz pública elegante
 """
 
+import pandas as pd
+from typing import List, Dict, Any, Union
+
 try:
-    from ..engines.xxx_engine import XxxEngine
+    from ..config.settings import V2Settings
     from ..io.xxx_client import XxxClient
     from ..processing.transformers.xxx_transformer import XxxTransformer
     from ..processing.validators.xxx_validator import XxxValidator
+    from ..engines.xxx_engine import XxxEngine
 except ImportError:
-    raise ImportError("XxxAPI V2 requiere dependencias de imports relativos")
+    raise ImportError("XxxAPI requiere todas las dependencias")
 
 class XxxAPI:
-    """Wrapper que mantiene interfaz exacta de V1"""
+    """API pública para Xxx con interfaz moderna"""
 
-    def __init__(self, param1, param2):  # MISMOS PARÁMETROS QUE V1
-        """Constructor IDÉNTICO a V1"""
-        self.param1 = param1
-        self.param2 = param2
-        self._engine = XxxEngine()
+    def __init__(self):
         self._client = XxxClient()
         self._transformer = XxxTransformer()
         self._validator = XxxValidator()
+        self._engine = XxxEngine()
 
-    def metodo_v1(self, param):
-        """Método IDÉNTICO a V1"""
-        return self._engine.metodo_principal(param)
+    def get_xxx(self, as_df: bool = False) -> Union[pd.DataFrame, List[Dict[str, Any]]]:
+        """
+        Obtiene datos procesados de Xxx
 
-# Alias para compatibilidad con v1
-XxxCalcular = XxxAPI
+        Args:
+            as_df: Si True retorna DataFrame, si False lista de diccionarios
+
+        Returns:
+            Datos procesados y validados
+        """
+        V2Settings.logger("Iniciando obtención de datos Xxx")
+
+        # 1) Obtener datos crudos
+        raw_data = self._client.fetch_xxx_data()
+
+        # 2) Convertir a DataFrame
+        df = self._transformer.convertir_a_dataframe(raw_data)
+
+        # 3) Validar columnas
+        self._validator.validar_columnas_xxx(df)
+
+        # 4) Transformar datos
+        df = self._transformer.renombrar_columnas_xxx(df)
+        df = self._transformer.procesar_datos_xxx(df)
+
+        # 5) Validar schema
+        validated_data = self._validator.validar_schema_xxx(df)
+
+        # 6) Retornar según formato
+        if as_df:
+            return self._transformer.convertir_a_dataframe(validated_data)
+        return validated_data
+
+# Instancia global
+xxx_api = XxxAPI()
+
+# Función de conveniencia
+def get_xxx(as_df: bool = False):
+    """Función de conveniencia: toolbox.xxx.get_xxx()"""
+    return xxx_api.get_xxx(as_df)
 ```
 
-### 7️⃣ **Test** (Compatibilidad)
+### 7️⃣ **Test** (Testing comprehensivo)
 
 ```python
 """
-🧪 Test Xxx V2 - Compatibilidad V1
+🧪 Test Xxx V2 - Testing moderno
 """
 
 import pytest
 import pandas as pd
 
-def test_xxx_v2_basic():
-    """Test que V2 tiene misma interfaz que V1"""
+def test_xxx_api_basic():
+    """Test básico de funcionalidad API"""
     try:
         from ..api.xxx_api import XxxAPI
     except ImportError:
         pytest.skip("No se pudo importar XxxAPI")
 
-    # Datos mínimos para test
-    param1 = "test"
-    param2 = pd.DataFrame({"col": [1, 2, 3]})
-
-    # Constructor igual que V1
-    xxx_api = XxxAPI(param1, param2)
-
-    # Verificar interfaz
-    assert hasattr(xxx_api, 'metodo_v1')
-    assert callable(xxx_api.metodo_v1)
+    api = XxxAPI()
 
     # Verificar arquitectura hexagonal
-    assert hasattr(xxx_api, '_engine')
-    assert hasattr(xxx_api, '_client')
-    assert hasattr(xxx_api, '_transformer')
-    assert hasattr(xxx_api, '_validator')
+    assert hasattr(api, '_client')
+    assert hasattr(api, '_transformer')
+    assert hasattr(api, '_validator')
+    assert hasattr(api, '_engine')
+
+    # Verificar métodos públicos
+    assert hasattr(api, 'get_xxx')
+    assert callable(api.get_xxx)
 
     print("✅ Test XxxAPI: PASSED")
 
+def test_xxx_api_functionality():
+    """Test de funcionalidad real"""
+    from ..api.xxx_api import get_xxx
+
+    # Test con datos reales
+    resultado = get_xxx(as_df=True)
+    assert isinstance(resultado, pd.DataFrame)
+
+    # Test con lista
+    resultado_list = get_xxx(as_df=False)
+    assert isinstance(resultado_list, list)
+
+    print("✅ Test funcionalidad Xxx: PASSED")
+
 if __name__ == "__main__":
-    test_xxx_v2_basic()
+    test_xxx_api_basic()
+    test_xxx_api_functionality()
 ```
 
-## � PROCESO DE MIGRACIÓN - 4 PASOS EXACTOS
+## 🚀 PROCESO DE DESARROLLO - 4 PASOS MODERNOS
 
-### **PASO 1: ANALIZAR V1** ⏱️ 10 minutos máximo
+### **PASO 1: DISEÑAR DOMINIO** ⏱️ 15 minutos máximo
 
-1. Leer archivo `XxxCalcular.py` completo
-2. Identificar constructor: `__init__(self, param1, param2)`
-3. Listar métodos públicos: `method1()`, `method2()`
-4. Identificar dependencias (obtener, schemas)
+1. Identificar entidad de negocio: `Referidos`, `Comisiones`, etc.
+2. Definir schema Pydantic robusto con validadores
+3. Mapear fuentes de datos (Google Sheets, APIs, etc.)
+4. Diseñar interfaz pública elegante
 
-### **PASO 2: CREAR ESTRUCTURA** ⏱️ 10 minutos máximo
+### **PASO 2: CREAR ESTRUCTURA** ⏱️ 15 minutos máximo
 
-Crear los **6 archivos obligatorios** siguiendo templates exactos:
+Crear los **6 archivos obligatorios** siguiendo templates modernos:
 
--   `engines/xxx_engine.py`
--   `io/xxx_client.py`
--   `schemas/xxx_schema.py`
--   `processing/transformers/xxx_transformer.py`
--   `processing/validators/xxx_validator.py`
--   `api/xxx_api.py`
+-   `engines/xxx_engine.py` - Lógica de negocio especializada
+-   `io/xxx_client.py` - Cliente para fuentes externas
+-   `schemas/xxx_schema.py` - Schema Pydantic robusto
+-   `processing/transformers/xxx_transformer.py` - Transformaciones
+-   `processing/validators/xxx_validator.py` - Validaciones
+-   `api/xxx_api.py` - API pública elegante
 
-### **PASO 3: COPIAR LÓGICA** ⏱️ 20 minutos máximo
+### **PASO 3: IMPLEMENTAR LÓGICA** ⏱️ 30 minutos máximo
 
--   Engine: Copiar **TODO** el código de `XxxCalcular.py`
--   API: Crear wrapper con **misma interfaz** que V1
--   Resto: Implementar como placeholders
+-   Engine: Implementar lógica de negocio optimizada
+-   Client: Conectar con fuentes de datos reales
+-   Schema: Validadores robustos con Pydantic
+-   Transformer: Transformaciones específicas del dominio
+-   Validator: Validaciones todo o nada
+-   API: Interfaz pública clara y elegante
 
-### **PASO 4: TEST SIMPLE** ⏱️ 5 minutos máximo
+### **PASO 4: TESTING COMPREHENSIVO** ⏱️ 15 minutos máximo
 
--   Crear `test/test_xxx.py` siguiendo template
--   Verificar que imports funcionan
--   Verificar que interfaz es idéntica a V1
+-   Crear `test/test_xxx.py` con tests modernos
+-   Verificar arquitectura hexagonal
+-   Probar funcionalidad real con datos
+-   Validar performance y robustez
 
 ## ⚡ CRITERIOS DE ÉXITO
 
-### ✅ **MIGRACIÓN EXITOSA**
+### ✅ **IMPLEMENTACIÓN EXITOSA**
 
--   6 archivos creados siguiendo templates exactos
--   Constructor idéntico a V1
--   Métodos públicos idénticos a V1
--   Test simple pasa sin errores
--   Tiempo total < 45 minutos
+-   6 archivos creados siguiendo arquitectura hexagonal
+-   Schema Pydantic robusto con validadores
+-   Cliente funcional para fuentes externas
+-   API pública elegante y documentada
+-   Tests comprehensivos que pasan
+-   Tiempo total < 75 minutos
 
-### ❌ **MIGRACIÓN FALLIDA**
+### ❌ **IMPLEMENTACIÓN FALLIDA**
 
 -   Faltan archivos (menos de 6)
--   Interfaz diferente a V1
--   Lógica de negocio modificada
--   Tiempo > 1 hora
+-   Schema sin validadores robustos
+-   Cliente no funcional o placeholder vacío
+-   API sin documentación clara
+-   Tests que no pasan o son insuficientes
+-   Tiempo > 2 horas
 
-## 🚫 PROHIBICIONES ABSOLUTAS
+## 🚫 ANTI-PATTERNS A EVITAR
 
--   ❌ Modificar lógica de cálculos financieros
--   ❌ Cambiar nombres de métodos públicos
--   ❌ Modificar signatures de constructores
--   ❌ Agregar validaciones no existentes en V1
--   ❌ Optimizar performance
--   ❌ Crear menos de 6 archivos por módulo
+-   ❌ Copiar código legacy sin refactorizar
+-   ❌ Mantener compatibilidad con sistemas antiguos
+-   ❌ Placeholders vacíos sin implementación
+-   ❌ Schema sin validadores personalizados
+-   ❌ APIs sin documentación adecuada
+-   ❌ Tests triviales sin valor real
 
-## ✅ PERMITIDO EN V2
+## ✅ BEST PRACTICES OBLIGATORIAS
 
--   ✅ Reestructurar código entre archivos
--   ✅ Agregar imports relativos
--   ✅ Agregar placeholders para futura expansión
--   ✅ Agregar docstrings descriptivos
--   ✅ Agregar `model_config = ConfigDict(arbitrary_types_allowed=True)`
+-   ✅ Implementar lógica de negocio optimizada
+-   ✅ Usar Pydantic para validación robusta
+-   ✅ Logging centralizado con V2Settings
+-   ✅ Imports relativos con manejo de errores
+-   ✅ Cliente funcional para fuentes reales
+-   ✅ API elegante con type hints completos
+-   ✅ Tests que validen funcionalidad real
 
 ## 🚀 COMANDO DE VALIDACIÓN
 
 ```bash
-cd utils/adelantafactoring/v2
-python -m pytest test/test_xxx.py -v
+# Test específico del módulo
+python test/test_xxx.py
 
-# Resultado esperado:
-# ✅ test_xxx_v2_basic PASSED
-# ✅ Sin errores de import
-# ✅ Tiempo < 5 segundos
+# Test con pytest
+pytest test/test_xxx.py -v
+
+# Test de funcionalidad real
+python -c "from toolbox.api.xxx_api import get_xxx; print('✅ Import OK'); result = get_xxx(as_df=True); print(f'✅ Funciona: {result.shape}')"
+
+# Resultado esperado siempre:
+# ✅ Import exitoso
+# ✅ Funcionalidad real operativa
+# ✅ Arquitectura hexagonal completa
+# ✅ Performance optimizada
 ```
 
 ---
 
-## 🎯 LEMA DE MIGRACIÓN V2
+## 🎯 LEMA DE DESARROLLO MODERNO
 
-> **"6 archivos obligatorios. Interfaz idéntica. Lógica copiada exacta."**
+> **"6 archivos obligatorios. Arquitectura hexagonal pura. Lógica optimizada. APIs elegantes."**
 
-Esta es una **reestructuración arquitectónica** que facilita el mantenimiento futuro, NO una reescritura de lógica de negocio.
+Esta es una **implementación moderna de arquitectura hexagonal** que maximiza mantenibilidad, testabilidad y escalabilidad sin comprometer la elegancia del código.

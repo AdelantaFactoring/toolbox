@@ -6,7 +6,8 @@ Contiene Base y BaseObtenerV2 para herencia múltiple y compatibilidad V1.
 
 import functools
 import time
-from typing import Optional
+
+# from typing import Optional
 
 try:
     from ..config.settings import V2Settings
@@ -37,16 +38,3 @@ class Base:
             return result
 
         return wrapper
-
-
-class BaseObtenerV2(Base):
-    """
-    🌐 Clase base V2 para obtención de datos externos.
-
-    Proporciona funcionalidad común para clases que obtienen datos
-    de webservices o fuentes externas.
-    """
-
-    def __init__(self) -> None:
-        self.token: Optional[str] = None
-        self._timeout = 60  # Timeout por defecto

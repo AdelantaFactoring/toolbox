@@ -23,7 +23,7 @@ class V2Settings:
 
     # 📊 KPI Configuration
     KPI_TOKEN_URL = f"{WEBSERVICE_BASE_URL}/webservice/token"
-    KPI_DATA_URL = f"{WEBSERVICE_BASE_URL}/webservice/colocaciones"
+    KPI_COLOCACIONES_URL = f"{WEBSERVICE_BASE_URL}/webservice/colocaciones"
     KPI_CREDENTIALS = {
         "username": "adelantafactoring",
         "password": "jSB@$M5tR9pAXsUy",
@@ -48,6 +48,8 @@ class V2Settings:
         "ventas_autodetraccion": "https://script.google.com/macros/s/AKfycbxZS8ahi8BnlBJcRx4H9E_qy1JHbhIATqnNUx_P-OJGrDstcGjDtACpeftKozeOCp0_/exec",
         "referidos": "https://script.google.com/macros/s/AKfycbxZS8ahi8BnlBJcRx4H9E_qy1JHbhIATqnNUx_P-OJGrDstcGjDtACpeftKozeOCp0_/exec",
         "sector_pagadores": "https://script.google.com/macros/s/AKfycbxxdJazJbEJ7qbGgi8oBAJrzIZjpnD1cYKv1RkcBQtQSx7KA60UGaXMYHTKxKOeRC3c/exec",
+        "operaciones_fuera_sistema_pen": "https://script.google.com/macros/s/AKfycbyWsLb2hCr7cuXJIUorkmQJZEPnH-7i24Zy2yRlSfOwb4BZGPs01zdmiRVKuzRN8uKCtg/exec",
+        "operaciones_fuera_sistema_usd": "https://script.google.com/macros/s/AKfycbz3Jt1zj_29QPEM4hexYdlvcgSMNUICsF9xNsEPlDaGSF-0VXv7JPouSkhGH8AubU5-/exec",
     }
 
     # 🔗 Webservice Endpoints

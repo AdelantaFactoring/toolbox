@@ -5,11 +5,17 @@ Configuración centralizada para pytest con fixtures útiles y setup del entorno
 
 import pytest
 import sys
+import os
 from pathlib import Path
 
 # Configuración de paths para imports
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+# También agregar al PYTHONPATH para mayor compatibilidad
+os.environ["PYTHONPATH"] = (
+    str(project_root) + os.pathsep + os.environ.get("PYTHONPATH", "")
+)
 
 
 @pytest.fixture

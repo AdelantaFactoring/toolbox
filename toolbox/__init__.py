@@ -3,6 +3,24 @@
 Paquete interno con arquitectura hexagonal
 """
 
+# Aliases para compatibilidad y API simple
+__all__ = [
+    # Comisiones
+    "ComisionesCalcular",
+    # Fondos individuales
+    "FondoPromocionalAPI",
+    "get_fondo_promocional",
+    "FondoCrecerAPI",
+    "get_fondo_crecer",
+    # Otros APIs
+    "DiferidoExternoAPI",
+    "DiferidoInternoAPI",
+    "SectorPagadoresAPI",
+    "VentasAutodetraccionesAPI",
+    "ReferidosAPI",
+    "OperacionesFueraSistemaAPI",
+]
+
 # Imports principales de la toolbox
 try:
     from .api.comisiones_api import ComisionesCalcular
@@ -65,6 +83,13 @@ try:
 except ImportError as e:
     raise ImportError(
         f"ReferidosAPI V2 requiere dependencias de imports relativos: {e}"
+    )
+
+try:
+    from .api.operaciones_fuera_sistema_api import OperacionesFueraSistemaAPI
+except ImportError as e:
+    raise ImportError(
+        f"OperacionesFueraSistemaAPI V2 requiere dependencias de imports relativos: {e}"
     )
 
 # Exports públicos
