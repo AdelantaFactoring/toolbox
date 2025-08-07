@@ -43,7 +43,7 @@ class ComisionesAPI:
 
         logger("ComisionesCalcular V2: Dependencias V2 inicializadas")
 
-    def calcular_comisiones(
+    def get_comisiones(
         self, start_date: str = "2023-01-01", end_date: str = "2024-05-31"
     ) -> BytesIO:
         """
@@ -124,3 +124,30 @@ class ComisionesAPI:
         )
 
         return zip_bytes
+
+
+# Funciones de conveniencia para uso directo
+def get_comisiones_sync(
+    kpi_df: pd.DataFrame, start_date: str = "2023-01-01", end_date: str = "2024-05-31"
+) -> BytesIO:
+    """
+    Función de conveniencia síncrona para calcular comisiones directamente
+
+    Usage:
+        resultado = toolbox.comisiones.get_comisiones_sync(kpi_df, start_date, end_date)
+    """
+    api = ComisionesAPI(kpi_df)
+    return api.get_comisiones(start_date, end_date)
+
+
+async def get_comisiones_async(
+    kpi_df: pd.DataFrame, start_date: str = "2023-01-01", end_date: str = "2024-05-31"
+) -> BytesIO:
+    """
+    Función de conveniencia asíncrona para calcular comisiones directamente
+
+    Usage:
+        resultado = await toolbox.comisiones.get_comisiones_async(kpi_df, start_date, end_date)
+    """
+    api = ComisionesAPI(kpi_df)
+    return api.get_comisiones(start_date, end_date)

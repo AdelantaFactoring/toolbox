@@ -970,7 +970,7 @@ class ComisionesEngine(BaseEngine):
 
         # 3. Casos especiales (Ricardo Franco y Red Capital)
         for ejecutivo in ejecutivos_especiales + ejecutivos_referencia:
-            df_especial = df[df["Ejecutivo"] == ejecutivo].copy()
+            df_especial = df[df["Referencia"] == ejecutivo].copy()
             if not df_especial.empty:
                 df_especial.loc[:, "Comision"] = np.where(
                     df_especial["Moneda"] == "USD",
