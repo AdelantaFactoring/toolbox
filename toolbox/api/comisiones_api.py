@@ -124,7 +124,3 @@ class ComisionesAPI:
         )
 
         return zip_bytes
-
-
-# Alias para compatibilidad con v1
-ComisionesCalcular = ComisionesAPI

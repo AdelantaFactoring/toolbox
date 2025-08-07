@@ -969,16 +969,10 @@ class ComisionesEngine(BaseEngine):
             df_especial = df[df["Ejecutivo"] == ejecutivo].copy()
             if not df_especial.empty:
                 df_especial.loc[:, "Comision"] = np.where(
-                    pd.isna(df_especial["ComisionEstructuracionConIGV"])
-                    | (df_especial["ComisionEstructuracionConIGV"] == 0),
-                    np.where(
-                        df_especial["Moneda"] == "USD",
-                        df_especial["ComisionEstructuracionConIGV"]
-                        / IGV_FACTOR
-                        * df_especial["TipoCambioVenta"],
-                        df_especial["ComisionEstructuracionConIGV"] / IGV_FACTOR,
-                    ),
-                    df_especial["UtilidadTotalSoles"],
+                    df_especial["Moneda"] == "USD",
+                    (df_especial["Interes"] - df_especial["CostosFondo"])
+                    * df_especial["TipoCambioVenta"],
+                    df_especial["Interes"] - df_especial["CostosFondoSoles"],
                 )
                 dfs_externos.append(df_especial)
 
