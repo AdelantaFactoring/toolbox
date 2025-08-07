@@ -899,10 +899,12 @@ class ComisionesEngine(BaseEngine):
     def calcular_comisiones_v1(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calcula comisiones personalizadas según categoría de ejecutivo.
+        Implementación vectorizada completa sin loops ni concat.
 
         Implementa diferentes reglas de cálculo:
         - Ejecutivos internos: tasas variables según tipo de operación
         - Ejecutivos externos: tasas fijas según persona
+        - Ejecutivos especiales: por columna Referencia con lógica de intereses
 
         Parámetros:
             df: DataFrame con datos de liquidaciones y utilidades
@@ -922,66 +924,62 @@ class ComisionesEngine(BaseEngine):
 
         # Clasificación de ejecutivos
         ejecutivos_externos = list(TASAS_EJECUTIVOS_EXTERNOS.keys())
-        ejecutivos_especiales = [
-            "Ricardo Franco",
-            "Red, Capital",
-        ]  # Se procesan aparte
+        ejecutivos_especiales = ["Ricardo Franco", "Red, Capital"]
         ejecutivos_referencia = ["RED CAPITAL"]
-        todos_ejecutivos = df["Ejecutivo"].unique().tolist()
-        ejecutivos_internos = [
-            ejecutivo
-            for ejecutivo in todos_ejecutivos
-            if ejecutivo not in ejecutivos_externos + ejecutivos_especiales
-        ]
 
-        # 1. Cálculo para ejecutivos internos (tasas variables según tipo de operación)
-        df_internos = df[df["Ejecutivo"].isin(ejecutivos_internos)].copy()
-        if not df_internos.empty:
+        # Inicializar columna de comisiones
+        df["Comision"] = 0.0
+
+        # VECTORIZACIÓN COMPLETA CON NP.SELECT
+
+        # 1. Casos especiales (por columna Referencia)
+        especiales_mask = df["Referencia"].isin(
+            ejecutivos_especiales + ejecutivos_referencia
+        )
+        if especiales_mask.any():
+            comision_especiales = np.where(
+                df["Moneda"] == "USD",
+                (df["Interes"] - df["CostosFondo"]) * df["TipoCambioVenta"],
+                df["Interes"] - df["CostosFondoSoles"],
+            )
+            df.loc[especiales_mask, "Comision"] = comision_especiales[especiales_mask]
+
+        # 2. Ejecutivos externos (por columna Ejecutivo)
+        for ejecutivo, tasa in TASAS_EJECUTIVOS_EXTERNOS.items():
+            externos_mask = df["Ejecutivo"] == ejecutivo
+            if externos_mask.any():
+                comision_externos = np.where(
+                    pd.isna(df["ComisionEstructuracionConIGV"])
+                    | (df["ComisionEstructuracionConIGV"] == 0),
+                    df["UtilidadTotalSoles"] * tasa,
+                    df["ComisionEstructuracionConIGV"] / IGV_FACTOR,
+                )
+                df.loc[externos_mask, "Comision"] = comision_externos[externos_mask]
+
+        # 3. Ejecutivos internos (todos los que no son externos ni especiales)
+        internos_mask = ~df["Ejecutivo"].isin(ejecutivos_externos) & ~df[
+            "Referencia"
+        ].isin(ejecutivos_especiales + ejecutivos_referencia)
+
+        if internos_mask.any():
+            # Condiciones para ejecutivos internos
             conditions = [
                 # Nuevos, mismo referente y ejecutivo
-                (df_internos["Comisiones"] == "Lista Actual")
-                & (df_internos["Tipo"] == "Nuevo")
-                & (df_internos["Ejecutivo"] == df_internos["Referencia"]),
+                (df["Comisiones"] == "Lista Actual")
+                & (df["Tipo"] == "Nuevo")
+                & (df["Ejecutivo"] == df["Referencia"]),
                 # Nuevos, referente distinto al ejecutivo
-                (df_internos["Comisiones"] == "Lista Actual")
-                & (df_internos["Tipo"] == "Nuevo")
-                & (df_internos["Ejecutivo"] != df_internos["Referencia"]),
+                (df["Comisiones"] == "Lista Actual")
+                & (df["Tipo"] == "Nuevo")
+                & (df["Ejecutivo"] != df["Referencia"]),
                 # Lista anterior
-                (df_internos["Comisiones"] == "Lista Anterior"),
+                (df["Comisiones"] == "Lista Anterior"),
             ]
             choices = [0.11, 0.07, 0.09]
-            df_internos.loc[:, "Tasa"] = np.select(conditions, choices, default=0.06)
-            df_internos["Comision"] = (
-                df_internos["Tasa"] * df_internos["UtilidadTotalSoles"]
-            )
 
-        # 2. Ejecutivos externos con tasas fijas
-        dfs_externos = []
-        for ejecutivo, tasa in TASAS_EJECUTIVOS_EXTERNOS.items():
-            df_ejecutivo = df[df["Ejecutivo"] == ejecutivo].copy()
-            if not df_ejecutivo.empty:
-                df_ejecutivo.loc[:, "Comision"] = np.where(
-                    pd.isna(df_ejecutivo["ComisionEstructuracionConIGV"])
-                    | (df_ejecutivo["ComisionEstructuracionConIGV"] == 0),
-                    df_ejecutivo["UtilidadTotalSoles"] * tasa,
-                    df_ejecutivo["ComisionEstructuracionConIGV"] / IGV_FACTOR,
-                )
-                dfs_externos.append(df_ejecutivo)
+            # Aplicar tasas solo a ejecutivos internos
+            tasas_internos = np.select(conditions, choices, default=0.06)
+            comision_internos = tasas_internos * df["UtilidadTotalSoles"]
+            df.loc[internos_mask, "Comision"] = comision_internos[internos_mask]
 
-        # 3. Casos especiales (Ricardo Franco y Red Capital)
-        for ejecutivo in ejecutivos_especiales + ejecutivos_referencia:
-            df_especial = df[df["Referencia"] == ejecutivo].copy()
-            if not df_especial.empty:
-                df_especial.loc[:, "Comision"] = np.where(
-                    df_especial["Moneda"] == "USD",
-                    (df_especial["Interes"] - df_especial["CostosFondo"])
-                    * df_especial["TipoCambioVenta"],
-                    df_especial["Interes"] - df_especial["CostosFondoSoles"],
-                )
-                dfs_externos.append(df_especial)
-
-        # Unir todos los DataFrames
-        dfs_a_unir = [df_internos] + dfs_externos
-        dfs_no_vacios = [df for df in dfs_a_unir if not df.empty]
-
-        return pd.concat(dfs_no_vacios, axis=0, ignore_index=True)
+        return df
