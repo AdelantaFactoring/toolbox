@@ -4,6 +4,7 @@ ComisionesCalcular V2 API
 
 from io import BytesIO
 import pandas as pd
+import asyncio
 
 
 try:
@@ -149,5 +150,11 @@ async def get_comisiones_async(
     Usage:
         resultado = await toolbox.comisiones.get_comisiones_async(kpi_df, start_date, end_date)
     """
-    api = ComisionesAPI(kpi_df)
-    return api.get_comisiones(start_date, end_date)
+
+    # Ejecutar la función síncrona en un loop asyncio
+    def _run_sync():
+        api = ComisionesAPI(kpi_df)
+        return api.get_comisiones(start_date, end_date)
+
+    # Usar asyncio.to_thread para ejecutar la función síncrona de forma asíncrona
+    return await asyncio.to_thread(_run_sync)
