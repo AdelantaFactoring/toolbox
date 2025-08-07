@@ -922,7 +922,11 @@ class ComisionesEngine(BaseEngine):
 
         # Clasificación de ejecutivos
         ejecutivos_externos = list(TASAS_EJECUTIVOS_EXTERNOS.keys())
-        ejecutivos_especiales = ["Ricardo Franco", "Red, Capital"]  # Se procesan aparte
+        ejecutivos_especiales = [
+            "Ricardo Franco",
+            "Red, Capital",
+        ]  # Se procesan aparte
+        ejecutivos_referencia = ["RED CAPITAL"]
         todos_ejecutivos = df["Ejecutivo"].unique().tolist()
         ejecutivos_internos = [
             ejecutivo
@@ -965,7 +969,7 @@ class ComisionesEngine(BaseEngine):
                 dfs_externos.append(df_ejecutivo)
 
         # 3. Casos especiales (Ricardo Franco y Red Capital)
-        for ejecutivo in ejecutivos_especiales:
+        for ejecutivo in ejecutivos_especiales + ejecutivos_referencia:
             df_especial = df[df["Ejecutivo"] == ejecutivo].copy()
             if not df_especial.empty:
                 df_especial.loc[:, "Comision"] = np.where(
