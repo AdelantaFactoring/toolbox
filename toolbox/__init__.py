@@ -8,7 +8,7 @@ __version__ = "0.5.0"
 # Aliases para compatibilidad y API simple
 __all__ = [
     # Comisiones
-    "ComisionesCalcular",
+    "ComisionesAPI",
     # Fondos individuales
     "FondoPromocionalAPI",
     "get_fondo_promocional",
@@ -25,7 +25,7 @@ __all__ = [
 
 # Imports principales de la toolbox
 try:
-    from .api.comisiones_api import ComisionesCalcular
+    from .api.comisiones_api import ComisionesAPI
 except ImportError as e:
     raise ImportError(
         f"Módulos comisiones API V2 requieren dependencias de imports relativos: {e}"
@@ -97,7 +97,7 @@ except ImportError as e:
 # Exports públicos
 __all__ = [
     # Comisiones
-    "ComisionesCalcular",
+    "ComisionesAPI",
     # Fondos individuales
     "FondoPromocionalAPI",
     "get_fondo_promocional",
