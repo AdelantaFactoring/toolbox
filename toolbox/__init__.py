@@ -3,7 +3,7 @@ Adelanta Toolbox - Paquete interno
 Paquete interno con arquitectura hexagonal
 """
 
-__version__ = "0.5.0"
+__version__ = "0.51"
 
 # Aliases para compatibilidad y API simple
 __all__ = [
