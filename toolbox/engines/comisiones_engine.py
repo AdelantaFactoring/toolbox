@@ -937,11 +937,15 @@ class ComisionesEngine(BaseEngine):
             ejecutivos_especiales + ejecutivos_referencia
         )
         if especiales_mask.any():
-            comision_especiales = np.where(
-                df["Moneda"] == "USD",
-                (df["Interes"] - df["CostosFondo"]) * df["TipoCambioVenta"],
-                df["Interes"] - df["CostosFondoSoles"],
-            )
+            # Calcular factor de conversión USD -> PEN
+            factor = np.where(df["Moneda"] == "USD", df["TipoCambioVenta"], 1)
+
+            # InteresSoles = Interes * factor
+            interes_soles = df["Interes"] * factor
+
+            # Comision = (InteresSoles - CostosFondoSoles) * 0.06
+            comision_especiales = (interes_soles - df["CostosFondoSoles"]) * 0.06
+
             df.loc[especiales_mask, "Comision"] = comision_especiales[especiales_mask]
 
         # 2. Ejecutivos externos (por columna Ejecutivo)
