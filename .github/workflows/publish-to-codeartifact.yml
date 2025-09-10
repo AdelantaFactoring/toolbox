@@ -32,13 +32,19 @@ jobs:
 
             - name: Login to CodeArtifact
               run: |
-                  aws codeartifact login --tool pip --repository adelanta-toolbox --domain adelanta
+                  aws codeartifact login --tool pip --repository adelanta-toolbox --domain adelanta --region us-east-2
 
             - name: Build package
               run: |
                   uv build
 
-            - name: Publish to CodeArtifact
+            - name: Get CodeArtifact token and publish
               run: |
-                  REPO_URL=$(aws codeartifact get-repository-endpoint --domain adelanta --repository adelanta-toolbox --format pypi --query repositoryEndpoint --output text)
-                  uv publish --publish-url $REPO_URL/pypi/adelanta-toolbox/ dist/*
+                  # Obtener token de CodeArtifact
+                  CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain adelanta --domain-owner 471112554393 --region us-east-2 --query authorizationToken --output text)
+                  
+                  # Obtener URL del repositorio
+                  REPO_URL=$(aws codeartifact get-repository-endpoint --domain adelanta --repository adelanta-toolbox --format pypi --query repositoryEndpoint --output text --region us-east-2)
+                  
+                  # Publicar con credenciales explícitas
+                  uv publish --publish-url $REPO_URL --username aws --password $CODEARTIFACT_AUTH_TOKEN dist/*
