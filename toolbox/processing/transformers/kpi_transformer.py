@@ -24,8 +24,16 @@ class KPITransformer(BaseTransformer):
 
     def __init__(self):
         super().__init__()
-        self.INTERESES_PEN = V2Settings.get_intereses_pen()
-        self.INTERESES_USD = V2Settings.get_intereses_usd()
+
+    @property
+    def INTERESES_PEN(self) -> float:
+        """Tasa de interés PEN (lazy loading)"""
+        return V2Settings.get_intereses_pen()
+
+    @property
+    def INTERESES_USD(self) -> float:
+        """Tasa de interés USD (lazy loading)"""
+        return V2Settings.get_intereses_usd()
 
     def fusionar_operaciones_fuera_sistema(
         self, df_main: pd.DataFrame, df_fuera: pd.DataFrame

@@ -20,7 +20,11 @@ class SectorPagadoresClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url = V2Settings.get_google_sheets_urls()["sector_pagadores"]
+
+    @property
+    def url(self) -> str:
+        """URL de Google Sheets para sector pagadores (lazy loading)"""
+        return V2Settings.get_google_sheets_urls()["sector_pagadores"]
 
     def fetch_sector_pagadores_data(self) -> Dict[str, Any]:
         """

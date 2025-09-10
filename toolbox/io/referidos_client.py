@@ -20,7 +20,11 @@ class ReferidosClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url = V2Settings.get_google_sheets_urls()["referidos"]
+
+    @property
+    def url(self) -> str:
+        """URL de Google Sheets para referidos (lazy loading)"""
+        return V2Settings.get_google_sheets_urls()["referidos"]
 
     def fetch_referidos_data(self) -> List[Dict[str, Any]]:
         """

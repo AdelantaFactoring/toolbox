@@ -16,8 +16,16 @@ class OperacionesFueraSistemaClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url_pen = settings.GOOGLE_SHEETS_URLS["operaciones_fuera_sistema_pen"]
-        self.url_usd = settings.GOOGLE_SHEETS_URLS["operaciones_fuera_sistema_usd"]
+
+    @property
+    def url_pen(self) -> str:
+        """URL de Google Sheets para operaciones fuera de sistema PEN (lazy loading)"""
+        return settings.GOOGLE_SHEETS_URLS["operaciones_fuera_sistema_pen"]
+
+    @property
+    def url_usd(self) -> str:
+        """URL de Google Sheets para operaciones fuera de sistema USD (lazy loading)"""
+        return settings.GOOGLE_SHEETS_URLS["operaciones_fuera_sistema_usd"]
 
     def fetch_operaciones_fuera_sistema_pen_data(self):
         """Obtiene datos PEN de manera síncrona"""

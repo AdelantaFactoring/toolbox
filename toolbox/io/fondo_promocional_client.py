@@ -20,7 +20,11 @@ class FondoPromocionalClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url = V2Settings.get_google_sheets_urls()["fondo_promocional"]
+
+    @property
+    def url(self) -> str:
+        """URL de Google Sheets para fondo promocional (lazy loading)"""
+        return V2Settings.get_google_sheets_urls()["fondo_promocional"]
 
     def fetch_fondo_promocional_data(self) -> List[Dict[str, Any]]:
         """
