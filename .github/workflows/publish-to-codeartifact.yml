@@ -41,4 +41,4 @@ jobs:
             - name: Publish to CodeArtifact
               run: |
                   REPO_URL=$(aws codeartifact get-repository-endpoint --domain adelanta --repository adelanta-toolbox --format pypi --query repositoryEndpoint --output text)
-                  uv publish --repository-url $REPO_URL/pypi/adelanta-toolbox/ dist/*
+                  uv publish --publish-url $REPO_URL/pypi/adelanta-toolbox/ dist/*
