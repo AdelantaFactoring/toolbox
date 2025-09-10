@@ -1,9 +1,36 @@
 """
 Adelanta Toolbox - Paquete interno
 Paquete interno con arquitectura hexagonal
+
+INICIALIZACIÓN REQUERIDA:
+    import toolbox
+    toolbox.configure(config_dict)
 """
 
 __version__ = "1.0.0"
+
+
+def configure(config: dict) -> None:
+    """
+    Configura Adelanta Toolbox con settings personalizados
+
+    Args:
+        config: Diccionario con configuración completa
+
+    Example:
+        config = {
+            'WEBSERVICE_BASE_URL': 'https://tu-webservice.com',
+            'KPI_CREDENTIALS': {'username': 'user', 'password': 'pass'},
+            'GOOGLE_SHEETS_URLS': {...},
+            'INTERESES_PEN': 0.14,
+            'INTERESES_USD': 0.12
+        }
+        toolbox.configure(config)
+    """
+    from .config.settings import V2Settings
+
+    V2Settings.initialize(config)
+
 
 # Aliases para compatibilidad y API simple
 __all__ = [
