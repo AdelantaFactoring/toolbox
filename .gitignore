@@ -1,5 +1,17 @@
 # Adelanta Factoring V2 - Archivos de desarrollo y cache
 
+# 🔒 SEGURIDAD - Archivos sensibles NO COMMITEAR
+production_settings.py
+.env
+.env.local
+.env.production
+.aws/
+aws-credentials.json
+*.key
+*.pem
+*.p12
+secrets/
+
 # Python
 __pycache__/
 *.py[cod]

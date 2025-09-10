@@ -41,7 +41,7 @@ class V2Settings:
     KPI_COLOCACIONES_URL = f"{WEBSERVICE_BASE_URL}/webservice/colocaciones"
     KPI_CREDENTIALS = {
         "username": "adelantafactoring",
-        "password": "jSB@$M5tR9pAXsUy",
+        "password": "CHANGE_ME_IN_PRODUCTION",  # ⚠️ Usar variables de entorno
     }
 
     # 💰 Financial Constants

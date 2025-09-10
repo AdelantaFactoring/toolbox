@@ -1,0 +1,44 @@
+# 🚀 Workflow para publicar automáticamente a AWS CodeArtifact
+name: Publish to CodeArtifact
+
+on:
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch:
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.12"
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v2
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: us-east-2
+
+            - name: Login to CodeArtifact
+              run: |
+                  aws codeartifact login --tool pip --repository adelanta-toolbox --domain adelanta
+
+            - name: Build package
+              run: |
+                  uv build
+
+            - name: Publish to CodeArtifact
+              run: |
+                  REPO_URL=$(aws codeartifact get-repository-endpoint --domain adelanta --repository adelanta-toolbox --format pypi --query repositoryEndpoint --output text)
+                  uv publish --repository-url $REPO_URL/pypi/adelanta-toolbox/ dist/*
