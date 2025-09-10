@@ -20,7 +20,7 @@ class ReferidosClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url = V2Settings.GOOGLE_SHEETS_URLS["referidos"]
+        self.url = V2Settings.get_google_sheets_urls()["referidos"]
 
     def fetch_referidos_data(self) -> List[Dict[str, Any]]:
         """

@@ -41,6 +41,38 @@ toolbox/
 
 ## Uso Rápido
 
+### ⚠️ **CONFIGURACIÓN OBLIGATORIA**
+
+Antes de usar la librería, **DEBES** configurarla con tus settings:
+
+```python
+# config.py
+TOOLBOX_CONFIG = {
+    'WEBSERVICE_BASE_URL': "https://tu-webservice.com",
+    'KPI_CREDENTIALS': {
+        "username": "TU_USERNAME",
+        "password": "TU_PASSWORD",
+    },
+    'INTERESES_PEN': 0.14,
+    'INTERESES_USD': 0.12,
+    'GOOGLE_SHEETS_URLS': {
+        "fondo_promocional": "TU_URL_1",
+        "fondo_crecer": "TU_URL_2",
+        # ... todas las URLs necesarias
+    }
+}
+```
+
+### Paso 2: Inicializar ANTES de usar
+
+```python
+import toolbox
+from config import TOOLBOX_CONFIG
+
+# ⚡ OBLIGATORIO: Configurar primero
+toolbox.configure(TOOLBOX_CONFIG)
+```
+
 ### KPI API
 
 ```python

@@ -20,7 +20,7 @@ class FondoPromocionalClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url = V2Settings.GOOGLE_SHEETS_URLS["fondo_promocional"]
+        self.url = V2Settings.get_google_sheets_urls()["fondo_promocional"]
 
     def fetch_fondo_promocional_data(self) -> List[Dict[str, Any]]:
         """

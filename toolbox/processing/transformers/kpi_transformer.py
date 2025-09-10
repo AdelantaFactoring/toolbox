@@ -24,8 +24,8 @@ class KPITransformer(BaseTransformer):
 
     def __init__(self):
         super().__init__()
-        self.INTERESES_PEN = V2Settings.INTERESES_PEN
-        self.INTERESES_USD = V2Settings.INTERESES_USD
+        self.INTERESES_PEN = V2Settings.get_intereses_pen()
+        self.INTERESES_USD = V2Settings.get_intereses_usd()
 
     def fusionar_operaciones_fuera_sistema(
         self, df_main: pd.DataFrame, df_fuera: pd.DataFrame

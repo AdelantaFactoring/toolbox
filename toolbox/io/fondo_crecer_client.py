@@ -20,7 +20,7 @@ class FondoCrecerClient(BaseClient):
 
     def __init__(self):
         super().__init__(timeout=30)
-        self.url = V2Settings.GOOGLE_SHEETS_URLS["fondo_crecer"]
+        self.url = V2Settings.get_google_sheets_urls()["fondo_crecer"]
 
     def fetch_fondo_crecer_data(self) -> List[Dict[str, Any]]:
         """

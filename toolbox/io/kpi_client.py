@@ -93,7 +93,8 @@ class KPIClient(BaseClient):
             async with httpx.AsyncClient(timeout=30) as client:
                 logger("Obteniendo token de acceso...")
                 response = await client.post(
-                    V2Settings.KPI_TOKEN_URL, data=V2Settings.KPI_CREDENTIALS
+                    V2Settings.get_kpi_token_url(),
+                    data=V2Settings.get_kpi_credentials(),
                 )
                 response.raise_for_status()
 
