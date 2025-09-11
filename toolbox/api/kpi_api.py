@@ -148,29 +148,6 @@ class KPIAPI:
             df = await self._calcular_metricas_financieras(df, sector_pagadores_df)
             logger("Cálculo de métricas financieras completado")
 
-            # 🔍 DIAGNÓSTICO: Exportar DataFrame a Excel antes de validación
-            try:
-                excel_file = "debug_kpi_before_validation.xlsx"
-                df.to_excel(excel_file, index=False)
-                logger(f"📊 DataFrame exportado a {excel_file} para diagnóstico")
-                logger(f"📋 Columnas en DataFrame: {list(df.columns)}")
-                logger(f"📏 Shape del DataFrame: {df.shape}")
-
-                # Mostrar primeras filas de columnas problemáticas
-                problematic_cols = ["FechaOperacion", "Mes", "MesAño"]
-                for col in problematic_cols:
-                    if col in df.columns:
-                        logger(
-                            f"🔍 {col} - Tipo: {df[col].dtype}, Valores únicos: {df[col].nunique()}"
-                        )
-                        logger(
-                            f"🔍 {col} - Primeros 5 valores: {df[col].head().tolist()}"
-                        )
-                        logger(f"🔍 {col} - Valores nulos: {df[col].isnull().sum()}")
-
-            except Exception as excel_error:
-                logger(f"❌ Error exportando a Excel: {excel_error}")
-
             # 10. Validación final y serialización
             validated_data = self._validator.validar_schema_kpi(df, tipo_reporte)
             logger(
