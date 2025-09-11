@@ -92,10 +92,35 @@ class KPIClient(BaseClient):
         try:
             async with httpx.AsyncClient(timeout=30) as client:
                 logger("Obteniendo token de acceso...")
+
+                # Debug: mostrar URL y credenciales (sin password completo)
+                url = V2Settings.get_kpi_token_url()
+                credentials = V2Settings.get_kpi_credentials()
+                debug_creds = {
+                    k: v if k != "password" else f"{v[:3]}***{v[-2:]}"
+                    for k, v in credentials.items()
+                }
+                logger(f"URL: {url}")
+                logger(f"Credentials: {debug_creds}")
+
                 response = await client.post(
-                    V2Settings.get_kpi_token_url(),
-                    data=V2Settings.get_kpi_credentials(),
+                    url,
+                    data=credentials,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
                 )
+
+                logger(f"Response Status: {response.status_code}")
+
+                # Si falla con form-data, intentar con JSON
+                if response.status_code == 401:
+                    logger("Intentando con JSON format...")
+                    response = await client.post(
+                        url,
+                        json=credentials,
+                        headers={"Content-Type": "application/json"},
+                    )
+                    logger(f"JSON Response Status: {response.status_code}")
+
                 response.raise_for_status()
 
                 token_data = response.json()
@@ -111,7 +136,13 @@ class KPIClient(BaseClient):
                 f"Timeout obteniendo token: {V2Settings.get_kpi_token_url()}"
             )
         except httpx.HTTPStatusError as e:
-            raise Exception(f"Error autenticación HTTP {e.response.status_code}")
+            error_details = f"HTTP {e.response.status_code}"
+            try:
+                error_body = e.response.text
+                error_details += f" - Body: {error_body[:200]}"
+            except Exception:
+                pass
+            raise Exception(f"Error autenticación: {error_details}")
         except Exception as e:
             raise Exception(f"Error inesperado obteniendo token: {e}")
 
