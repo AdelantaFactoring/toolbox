@@ -1,17 +1,27 @@
 """
-🧪 Test KPI V2 - Test específico para función get_kpi
+🧪 Test KPI V2 - Test limpio usando configuración automática
 
-Test para la función de conveniencia get_kpi
+Test para la función de conveniencia get_kpi con configuración automática desde conftest.py
 """
 
 import pytest
 import pandas as pd
 from datetime import datetime
+import asyncio
 
+# Importación limpia sin configuración hardcodeada
 try:
+    import toolbox
     from toolbox.api.kpi_api import get_kpi
+    from toolbox.config.settings import V2Settings
+
+    print(
+        "✅ Toolbox importado correctamente - configuración automática desde conftest.py"
+    )
+
 except ImportError as e:
-    print(f"Error: No se pudo importar get_kpi: {e}")
+    print(f"Error: No se pudo importar dependencias: {e}")
+    get_kpi = None
 
 
 def crear_datos_tipo_cambio_mock():
@@ -29,22 +39,31 @@ def crear_datos_tipo_cambio_mock():
 @pytest.mark.asyncio
 async def test_get_kpi_function():
     """
-    Test específico para la función get_kpi
+    Test específico para la función get_kpi con configuración real
 
-    Verifica que la función de conveniencia get_kpi funcione correctamente
+    Verifica que la función de conveniencia get_kpi funcione con datos reales
     """
+
+    if get_kpi is None:
+        pytest.skip("get_kpi no disponible - problema de importación")
+
     try:
-        # Preparar datos de prueba
+        print("🧪 Iniciando test KPI con configuración automática...")
+        print(f"🌐 URL Webservice: {V2Settings.get_webservice_base_url()}")
+        print(f"👤 Usuario KPI: {V2Settings.get_kpi_credentials()['username']}")
+
+        # Preparar datos de prueba - fechas más recientes y realistas
         tipo_cambio_df = crear_datos_tipo_cambio_mock()
-        start_date = datetime(2019, 1, 1)
-        end_date = datetime(2025, 7, 31)
-        fecha_corte = datetime(2025, 7, 31)
+        start_date = datetime(2024, 8, 1)
+        end_date = datetime(2024, 8, 31)
+        fecha_corte = datetime(2024, 8, 31)
 
         print("📍 Iniciando test de función get_kpi...")
         print(f"📅 Fechas: {start_date} a {end_date}")
+        print(f"📊 Tipo cambio DF shape: {tipo_cambio_df.shape}")
 
-        # Solo Test 2: Llamar función con as_df=True
-        print("🔄 Test: Llamando get_kpi con as_df=True...")
+        # Llamar función con as_df=True
+        print("🔄 Test: Llamando get_kpi con credenciales reales...")
         resultado_df = await get_kpi(
             tipo_cambio_df=tipo_cambio_df,
             start_date=start_date,
@@ -53,19 +72,24 @@ async def test_get_kpi_function():
             tipo_reporte=2,
             as_df=True,
         )
-        resultado_df.to_excel("test_kpi_resultado.xlsx", index=False)
+
+        # Guardar resultado
+        output_file = "test_kpi_resultado_real.xlsx"
+        resultado_df.to_excel(output_file, index=False)
+        print(f"📁 Resultado guardado en: {output_file}")
 
         print(f"✅ Test completado. Tipo resultado: {type(resultado_df)}")
+        print(f"📊 Shape del resultado: {resultado_df.shape}")
+
+        if len(resultado_df) > 0:
+            print(f"📋 Columnas: {list(resultado_df.columns)}")
+            print("🎯 Primeras 3 filas:")
+            print(resultado_df.head(3).to_string())
 
         # Verificar que retorna DataFrame
         assert isinstance(resultado_df, pd.DataFrame)
-
-        print("✅ Test función get_kpi: PASSED")
+        print("✅ Test función get_kpi con datos reales: PASSED")
         return True
-
-    except ImportError as e:
-        print(f"⚠️ Error de importación: {e}")
-        pytest.skip(f"Test omitido por error de importación: {e}")
 
     except Exception as e:
         print(f"❌ Test función get_kpi: FAILED - {e}")
@@ -75,13 +99,18 @@ async def test_get_kpi_function():
         print("🔍 Traceback completo:")
         traceback.print_exc()
 
-        # Para debugging, vamos a verificar si el error es por dependencias faltantes
+        # Análisis específico del error
         if "can't be used in 'await' expression" in str(e):
-            print(
-                "🚨 Error: El objeto no es awaitable - posible problema en la implementación"
-            )
+            print("🚨 Error: El objeto no es awaitable - problema en la implementación")
+        elif "401" in str(e) or "Unauthorized" in str(e):
+            print("🔐 Error de autenticación - verificar credenciales")
+        elif "timeout" in str(e).lower():
+            print("⏰ Error de timeout - servidor demoró mucho")
+        elif "connection" in str(e).lower():
+            print("🌐 Error de conexión - verificar URL del webservice")
 
-        pytest.skip(f"Test omitido por dependencias externas: {e}")
+        # Para test continuar, solo hacemos skip si es error de configuración
+        pytest.fail(f"Test falló con error: {e}")
 
 
 if __name__ == "__main__":

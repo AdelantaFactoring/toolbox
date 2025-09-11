@@ -1,6 +1,6 @@
 """
-🧪 Conftest V2 - Configuración optimizada para tests
-Configuración centralizada para pytest con fixtures útiles y setup del entorno.
+🧪 Conftest V2 - Configuración automática con test_settings.py
+Configuración centralizada para pytest con inicialización automática del toolbox.
 """
 
 import pytest
@@ -16,6 +16,35 @@ sys.path.insert(0, str(project_root))
 os.environ["PYTHONPATH"] = (
     str(project_root) + os.pathsep + os.environ.get("PYTHONPATH", "")
 )
+
+# Importar configuración de test y toolbox después de configurar paths
+from test_settings import test_settings
+from toolbox.config.settings import V2Settings
+
+
+@pytest.fixture(autouse=True)
+def auto_configure_toolbox():
+    """
+    Configuración automática del toolbox usando test_settings.py
+    Se ejecuta automáticamente antes de cada test
+    """
+    try:
+        # Convertir test_settings a formato toolbox
+        config = test_settings.to_toolbox_config()
+
+        # Inicializar V2Settings con la configuración
+        V2Settings.initialize(config)
+
+        print("✅ Toolbox configurado automáticamente desde test_settings.py")
+
+    except Exception as e:
+        print(f"❌ Error configurando toolbox: {e}")
+        raise
+
+    yield
+
+    # Cleanup después del test si es necesario
+    pass
 
 
 @pytest.fixture

@@ -34,14 +34,11 @@ def configure(config: dict) -> None:
 
 # Aliases para compatibilidad y API simple
 __all__ = [
-    # Comisiones
     "ComisionesAPI",
-    # Fondos individuales
     "FondoPromocionalAPI",
     "get_fondo_promocional",
     "FondoCrecerAPI",
     "get_fondo_crecer",
-    # Otros APIs
     "DiferidoExternoAPI",
     "DiferidoInternoAPI",
     "SectorPagadoresAPI",
@@ -121,16 +118,13 @@ except ImportError as e:
         f"OperacionesFueraSistemaAPI V2 requiere dependencias de imports relativos: {e}"
     )
 
-# Exports públicos
+
 __all__ = [
-    # Comisiones
     "ComisionesAPI",
-    # Fondos individuales
     "FondoPromocionalAPI",
     "get_fondo_promocional",
     "FondoCrecerAPI",
     "get_fondo_crecer",
-    # Otros APIs
     "DiferidoExternoAPI",
     "DiferidoInternoAPI",
     "SectorPagadoresAPI",

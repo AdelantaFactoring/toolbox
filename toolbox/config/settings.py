@@ -77,7 +77,7 @@ class V2Settings:
     def get_kpi_colocaciones_url(cls) -> str:
         """Obtiene la URL de colocaciones KPI"""
         cls._ensure_initialized()
-        return f"{cls._config['WEBSERVICE_BASE_URL']}/webservice/colocaciones"
+        return f"{cls._config['WEBSERVICE_BASE_URL']}/webservice/liquidacionCab/subquery-cab-con-anticipos"
 
     @classmethod
     def get_kpi_credentials(cls) -> dict:

@@ -44,7 +44,7 @@ class KPIClient(BaseClient):
         """
         try:
             data = await self._obtener_data_con_autenticacion(
-                url=V2Settings.KPI_COLOCACIONES_URL,
+                url=V2Settings.get_kpi_colocaciones_url(),
                 params={
                     "desde": start_date.strftime("%Y%m%d"),
                     "hasta": end_date.strftime("%Y%m%d"),
@@ -107,7 +107,9 @@ class KPIClient(BaseClient):
                 logger("Token obtenido exitosamente")
 
         except httpx.TimeoutException:
-            raise Exception(f"Timeout obteniendo token: {V2Settings.KPI_TOKEN_URL}")
+            raise Exception(
+                f"Timeout obteniendo token: {V2Settings.get_kpi_token_url()}"
+            )
         except httpx.HTTPStatusError as e:
             raise Exception(f"Error autenticación HTTP {e.response.status_code}")
         except Exception as e:
