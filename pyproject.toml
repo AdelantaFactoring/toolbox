@@ -41,6 +41,7 @@ dependencies = [
     "rapidfuzz>=3.0.0",
     "xlsxwriter>=3.0.0",
     "pydantic-settings>=2.8.1",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]

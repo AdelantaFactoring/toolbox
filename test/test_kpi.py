@@ -11,7 +11,6 @@ import asyncio
 
 # Importación limpia sin configuración hardcodeada
 try:
-    import toolbox
     from toolbox.api.kpi_api import get_kpi
     from toolbox.config.settings import V2Settings
 
@@ -54,9 +53,9 @@ async def test_get_kpi_function():
 
         # Preparar datos de prueba - fechas más recientes y realistas
         tipo_cambio_df = crear_datos_tipo_cambio_mock()
-        start_date = datetime(2024, 8, 1)
-        end_date = datetime(2024, 8, 31)
-        fecha_corte = datetime(2024, 8, 31)
+        start_date = datetime(2019, 7, 1)
+        end_date = datetime(2025, 9, 11)
+        fecha_corte = datetime(2025, 9, 11)
 
         print("📍 Iniciando test de función get_kpi...")
         print(f"📅 Fechas: {start_date} a {end_date}")
