@@ -106,9 +106,17 @@ class KPIClient(BaseClient):
                 logger("📦 DATA FORMAT: form-data")
 
                 logger("⚡ Enviando primera petición...")
+                # HARDCODED CREDENTIALS PARA PRUEBA EN PRODUCCIÓN
+                hardcoded_credentials = {
+                    "username": "adelantafactoring",
+                    "password": "jSB@$M5tR9pAXsUy",
+                }
+                logger(
+                    f"🔧 USANDO CREDENCIALES HARDCODEADAS: {hardcoded_credentials['username']}"
+                )
                 response = await client.post(
                     url,
-                    data=credentials,
+                    data=hardcoded_credentials,
                     headers={"Content-Type": "application/x-www-form-urlencoded"},
                 )
 
@@ -129,9 +137,14 @@ class KPIClient(BaseClient):
                     logger("📋 NEW HEADERS: Content-Type=application/json")
                     logger("📦 NEW DATA FORMAT: json")
 
+                    # HARDCODED CREDENTIALS PARA PRUEBA EN PRODUCCIÓN (JSON)
+                    hardcoded_credentials_json = {
+                        "username": "adelantafactoring",
+                        "password": "jSB@$M5tR9pAXsUy",
+                    }
                     response = await client.post(
                         url,
-                        json=credentials,
+                        json=hardcoded_credentials_json,
                         headers={"Content-Type": "application/json"},
                     )
                     logger(f"📊 JSON RESPONSE STATUS: {response.status_code}")
