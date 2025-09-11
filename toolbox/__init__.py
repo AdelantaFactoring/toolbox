@@ -7,7 +7,7 @@ INICIALIZACIÓN REQUERIDA:
     toolbox.configure(config_dict)
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.3"
 
 
 def configure(config: dict) -> None:
