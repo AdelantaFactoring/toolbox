@@ -36,7 +36,7 @@ class KPITransformer(BaseTransformer):
         return V2Settings.get_intereses_usd()
 
     def fusionar_operaciones_fuera_sistema(
-        self, df_main: pd.DataFrame, df_fuera: pd.DataFrame
+        self, df_main: pd.DataFrame, df_fuera: pd.DataFrame, tipo_reporte: int = 2
     ) -> pd.DataFrame:
         """
         Fusiona datos principales con operaciones fuera del sistema,
@@ -46,10 +46,19 @@ class KPITransformer(BaseTransformer):
         df_main = df_main.assign(FueraSistema="no")
         df_fuera = df_fuera.assign(FueraSistema="si")
 
-        # Convertir fechas
+        # Convertir fechas según el tipo de reporte
         date_cols = ["FechaOperacion", "FechaConfirmado", "FechaDesembolso"]
-        df_main = self._convertir_fechas(df_main, date_cols, "%d/%m/%Y")
-        df_fuera = self._convertir_fechas(df_fuera, date_cols, None)
+
+        # Para tipo_reporte = 2, el nuevo endpoint devuelve fechas en formato ISO (2025-01-02)
+        if tipo_reporte == 2:
+            df_main = self._convertir_fechas(
+                df_main, date_cols, None
+            )  # Formato ISO automático
+            df_fuera = self._convertir_fechas(df_fuera, date_cols, None)
+        else:
+            # Formato legacy para otros tipos de reporte
+            df_main = self._convertir_fechas(df_main, date_cols, "%d/%m/%Y")
+            df_fuera = self._convertir_fechas(df_fuera, date_cols, None)
 
         # Limpiar y preparar datos fuera del sistema
         df_fuera = df_fuera.replace({"CodigoLiquidacion": {"": np.nan}}).dropna(
