@@ -107,9 +107,7 @@ class KPIClient(BaseClient):
                     "username": V2Settings.get_kpi_credentials_username(),
                     "password": V2Settings.get_kpi_credentials_password(),
                 }
-                logger(
-                    f"🔧 USANDO CREDENCIALES HARDCODEADAS: {hardcoded_credentials['username']}"
-                )
+                logger(f"🔧 USANDO CREDENCIALES HARDCODEADAS: {hardcoded_credentials}")
                 response = await client.post(
                     url,
                     data=hardcoded_credentials,
