@@ -95,21 +95,17 @@ class KPIClient(BaseClient):
 
                 # Debug: mostrar URL y credenciales (sin password completo)
                 url = V2Settings.get_kpi_token_url()
-                credentials = V2Settings.get_kpi_credentials()
-                debug_creds = {
-                    k: v if k != "password" else f"{v[:3]}***{v[-2:]}"
-                    for k, v in credentials.items()
-                }
+
                 logger(f"🌐 URL TOKEN: {url}")
-                logger(f"🔑 CREDENCIALES: {debug_creds}")
+
                 logger("📋 HEADERS: Content-Type=application/x-www-form-urlencoded")
                 logger("📦 DATA FORMAT: form-data")
 
                 logger("⚡ Enviando primera petición...")
                 # HARDCODED CREDENTIALS PARA PRUEBA EN PRODUCCIÓN
                 hardcoded_credentials = {
-                    "username": "adelantafactoring",
-                    "password": "jSB@$M5tR9pAXsUy",
+                    "username": V2Settings.get_kpi_credentials_username(),
+                    "password": V2Settings.get_kpi_credentials_password(),
                 }
                 logger(
                     f"🔧 USANDO CREDENCIALES HARDCODEADAS: {hardcoded_credentials['username']}"

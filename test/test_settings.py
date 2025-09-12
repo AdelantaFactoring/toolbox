@@ -41,10 +41,12 @@ class TestSettings(BaseSettings):
         """Convierte la configuración a formato TOOLBOX_CONFIG"""
         return {
             "WEBSERVICE_BASE_URL": self.WEBSERVICE_BASE_URL,
-            "KPI_CREDENTIALS": {
-                "username": self.KPI_USERNAME,
-                "password": self.KPI_PASSWORD,
-            },
+            # "KPI_CREDENTIALS": {
+            #     "username": self.KPI_USERNAME,
+            #     "password": self.KPI_PASSWORD,
+            # },
+            "KPI_CREDENTIALS_USERNAME": self.KPI_USERNAME,
+            "KPI_CREDENTIALS_PASSWORD": self.KPI_PASSWORD,
             "INTERESES_PEN": self.INTERESES_PEN,
             "INTERESES_USD": self.INTERESES_USD,
             "GOOGLE_SHEETS_URLS": {

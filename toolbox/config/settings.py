@@ -37,7 +37,6 @@ class V2Settings:
         """
         required_keys = [
             "WEBSERVICE_BASE_URL",
-            "KPI_CREDENTIALS",
             "GOOGLE_SHEETS_URLS",
             "INTERESES_PEN",
             "INTERESES_USD",
@@ -77,13 +76,26 @@ class V2Settings:
     def get_kpi_colocaciones_url(cls) -> str:
         """Obtiene la URL de colocaciones KPI"""
         cls._ensure_initialized()
-        return f"{cls._config['WEBSERVICE_BASE_URL']}/webservice/liquidacionCab/subquery-cab-con-anticipos"
+        return f"{cls._config['WEBSERVICE_BASE_URL']}/webservice/colocaciones"
 
     @classmethod
     def get_kpi_credentials(cls) -> dict:
         """Obtiene las credenciales KPI"""
         cls._ensure_initialized()
         return cls._config["KPI_CREDENTIALS"]
+    
+    @classmethod
+    def get_kpi_credentials_username(cls) -> str:
+        """Obtiene el username de las credenciales KPI"""
+        cls._ensure_initialized()
+        return cls._config["KPI_CREDENTIALS_USERNAME"]
+    
+    @classmethod
+    def get_kpi_credentials_password(cls) -> str:
+        """Obtiene el password de las credenciales KPI"""
+        cls._ensure_initialized()
+        return cls._config["KPI_CREDENTIALS_PASSWORD"]
+
 
     @classmethod
     def get_intereses_pen(cls) -> float:

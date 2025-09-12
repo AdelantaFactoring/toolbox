@@ -49,7 +49,6 @@ async def test_get_kpi_function():
     try:
         print("🧪 Iniciando test KPI con configuración automática...")
         print(f"🌐 URL Webservice: {V2Settings.get_webservice_base_url()}")
-        print(f"👤 Usuario KPI: {V2Settings.get_kpi_credentials()['username']}")
 
         # Preparar datos de prueba - fechas más recientes y realistas
         tipo_cambio_df = crear_datos_tipo_cambio_mock()
