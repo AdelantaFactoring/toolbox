@@ -4,6 +4,7 @@ Configuración de Test usando pydantic-settings
 
 from pydantic_settings import BaseSettings
 from typing import Dict
+from pydantic import Field
 
 
 class TestSettings(BaseSettings):
@@ -12,7 +13,9 @@ class TestSettings(BaseSettings):
     # Webservice
     WEBSERVICE_BASE_URL: str
     KPI_USERNAME: str
-    KPI_PASSWORD: str
+    KPI_PASSWORD: str = Field(
+        env="KPI_PASSWORD", description="Password con caracteres especiales como @$"
+    )
 
     # Tasas de interés
     INTERESES_PEN: float

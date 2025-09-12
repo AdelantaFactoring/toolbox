@@ -19,9 +19,10 @@ class V2Settings:
     # 🔧 Logger Configuration
     @staticmethod
     def logger(message: str) -> None:
-        """Logger callable mejorado para compatibilidad V1"""
+        """Logger callable mejorado sin truncamiento de caracteres especiales"""
         print("🔧 ADELANTA TOOLBOX DEBUG:")
-        pprint(message)
+        # Usar print directo en lugar de pprint para evitar truncamiento
+        print(message)
         print("-" * 50)
 
         _logger = logging.getLogger(__name__)
@@ -83,19 +84,18 @@ class V2Settings:
         """Obtiene las credenciales KPI"""
         cls._ensure_initialized()
         return cls._config["KPI_CREDENTIALS"]
-    
+
     @classmethod
     def get_kpi_credentials_username(cls) -> str:
         """Obtiene el username de las credenciales KPI"""
         cls._ensure_initialized()
         return cls._config["KPI_CREDENTIALS_USERNAME"]
-    
+
     @classmethod
     def get_kpi_credentials_password(cls) -> str:
         """Obtiene el password de las credenciales KPI"""
         cls._ensure_initialized()
         return cls._config["KPI_CREDENTIALS_PASSWORD"]
-
 
     @classmethod
     def get_intereses_pen(cls) -> float:
