@@ -30,18 +30,6 @@ class KPIClient(BaseClient):
         fecha_corte: datetime,
         tipo_reporte: int = 2,
     ) -> List[Dict[str, Any]]:
-        """
-        Obtiene datos de colocaciones del webservice
-
-        Args:
-            start_date: Fecha inicio del reporte
-            end_date: Fecha fin del reporte
-            fecha_corte: Fecha de corte para el reporte
-            tipo_reporte: Tipo de reporte (2 = detalle de anticipos sin detalle de pagos)
-
-        Returns:
-            Lista de diccionarios con datos de colocaciones
-        """
         try:
             data = await self._obtener_data_con_autenticacion(
                 url=V2Settings.get_kpi_colocaciones_url(),
@@ -53,15 +41,19 @@ class KPIClient(BaseClient):
                 },
             )
 
-            if isinstance(data, list):
-                logger(f"Colocaciones obtenidas: {len(data)} registros")
-                return data
-            else:
-                logger("Respuesta no es lista, devolviendo lista vacía")
-                return []
+            # 🔍 BUSCAR ESPECÍFICAMENTE LIQ2510000109
+            liq_2510000109_records = [r for r in data if r.get('CodigoLiquidacion') == 'LIQ2510000109']
+            logger.info(f"🔍 LIQ2510000109 en datos crudos: {len(liq_2510000109_records)} registros")
+            
+            for record in liq_2510000109_records:
+                logger.info(f"📋 LIQ2510000109 - Doc: {record.get('NroDocumento')}, "
+                        f"Neto: {record.get('NetoConfirmado')}, "
+                        f"Fecha: {record.get('FechaOperacion')}")
+
+            return data
 
         except Exception as e:
-            logger(f"Error obteniendo colocaciones: {e}")
+            logger.error(f"❌ Error obteniendo colocaciones: {e}")
             raise
 
     async def _obtener_data_con_autenticacion(
