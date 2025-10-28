@@ -138,120 +138,89 @@ class KPITransformer(BaseTransformer):
     def calcular_kpis_financieros(
         self, df: pd.DataFrame, tipo_cambio_df: pd.DataFrame, sector_df: pd.DataFrame
     ) -> pd.DataFrame:
-            """Calcula métricas financieras, ingresos, costos y utilidades"""
-            df = df.copy()
+        """Calcula métricas financieras, ingresos, costos y utilidades"""
+        df = df.copy()
 
-            liq_before_merge = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 ANTES de merge: {len(liq_before_merge)} registros")
+        # Convertir columnas numéricas
+        columnas_numericas = [
+            "NetoConfirmado",
+            "MontoDesembolso",
+            "MontoPago",
+            "ComisionEstructuracionConIGV",
+            "Interes",
+            "GastosDiversosConIGV",
+            "DiasEfectivo",
+            "TipoCambioVenta",
+        ]
+        for col in columnas_numericas:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-            # Convertir columnas numéricas
-            columnas_numericas = [
-                "NetoConfirmado",
-                "MontoDesembolso",
-                "MontoPago",
-                "ComisionEstructuracionConIGV",
-                "Interes",
-                "GastosDiversosConIGV",
-                "DiasEfectivo",
-                "TipoCambioVenta",
-            ]
-            for col in columnas_numericas:
-                if col in df.columns:
-                    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
-
-            # Preparar tipo de cambio
-            tipo_cambio_df_temp = tipo_cambio_df.copy()
-            if "TipoCambioFecha" in tipo_cambio_df_temp.columns:
-                tipo_cambio_df_temp["TipoCambioFecha"] = pd.to_datetime(
-                    tipo_cambio_df_temp["TipoCambioFecha"], errors="coerce"
-                )
-
-            for col in ["TipoCambioVenta", "TipoCambioCompra"]:
-                if col in tipo_cambio_df_temp.columns:
-                    tipo_cambio_df_temp[col] = pd.to_numeric(
-                        tipo_cambio_df_temp[col], errors="coerce"
-                    ).fillna(1)
-
-            # Merge con tipo de cambio y sector
-            df = df.merge(
-                tipo_cambio_df_temp,
-                left_on="FechaOperacion",
-                right_on="TipoCambioFecha",
-                how="left",
+        # Preparar tipo de cambio
+        tipo_cambio_df_temp = tipo_cambio_df.copy()
+        if "TipoCambioFecha" in tipo_cambio_df_temp.columns:
+            tipo_cambio_df_temp["TipoCambioFecha"] = pd.to_datetime(
+                tipo_cambio_df_temp["TipoCambioFecha"], errors="coerce"
             )
-            liq_after_tc_merge = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS merge tipo cambio: {len(liq_after_tc_merge)} registros")
 
-            df = df.merge(sector_df, on="RUCPagador", how="left")
-            
-            liq_after_sector_merge = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS merge sector: {len(liq_after_sector_merge)} registros")
+        for col in ["TipoCambioVenta", "TipoCambioCompra"]:
+            if col in tipo_cambio_df_temp.columns:
+                tipo_cambio_df_temp[col] = pd.to_numeric(
+                    tipo_cambio_df_temp[col], errors="coerce"
+                ).fillna(1)
 
-            df["GrupoEco"] = df["GrupoEco"].fillna(df["RazonSocialPagador"])
+        # Merge con tipo de cambio y sector
+        df = df.merge(
+            tipo_cambio_df_temp,
+            left_on="FechaOperacion",
+            right_on="TipoCambioFecha",
+            how="left",
+        )
+        sector_df_clean = sector_df.drop_duplicates(subset=["RUCPagador"])
+        df = df.merge(sector_df_clean, on="RUCPagador", how="left")
+        
+        df["GrupoEco"] = df["GrupoEco"].fillna(df["RazonSocialPagador"])
 
-            # 🔍 DEBUG DESPUÉS DE FILLNA
-            liq_after_fillna = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS fillna: {len(liq_after_fillna)} registros")
+        # Conversiones USD → PEN
+        factor = np.where(df["Moneda"] == "USD", df["TipoCambioVenta"], 1)
+        df["ColocacionSoles"] = df["NetoConfirmado"] * factor
+        df["MontoDesembolsoSoles"] = df["MontoDesembolso"] * factor
+        df["MontoPagoSoles"] = df["MontoPago"] * factor
 
-            # Conversiones USD → PEN
-            factor = np.where(df["Moneda"] == "USD", df["TipoCambioVenta"], 1)
-            df["ColocacionSoles"] = df["NetoConfirmado"] * factor
-            df["MontoDesembolsoSoles"] = df["MontoDesembolso"] * factor
-            df["MontoPagoSoles"] = df["MontoPago"] * factor
+        # Calcular ingresos
+        df["Ingresos"] = (
+            df["ComisionEstructuracionConIGV"] / 1.18
+            + df["Interes"]
+            + df["GastosDiversosConIGV"] / 1.18
+        )
+        df["IngresosSoles"] = df["Ingresos"] * factor
 
-            # 🔍 DEBUG DESPUÉS DE CONVERSIONES
-            liq_after_conversiones = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS conversiones: {len(liq_after_conversiones)} registros")
+        # Calcular costos de fondeo
+        cost_rate = np.where(
+            df["Moneda"] == "PEN", self.INTERESES_PEN, self.INTERESES_USD
+        )
+        df["CostosFondo"] = ((1 + cost_rate) ** (df["DiasEfectivo"] / 365) - 1) * df[
+            "MontoDesembolso"
+        ]
+        df["CostosFondoSoles"] = df["CostosFondo"] * factor
 
-            # Calcular ingresos
-            df["Ingresos"] = (
-                df["ComisionEstructuracionConIGV"] / 1.18
-                + df["Interes"]
-                + df["GastosDiversosConIGV"] / 1.18
+        # Totales y utilidad
+        df["TotalIngresos"] = df["ComisionEstructuracionConIGV"] / 1.18 + df["Interes"]
+        df["TotalIngresosSoles"] = df["TotalIngresos"] * factor
+        df["Utilidad"] = df["TotalIngresosSoles"] - df["CostosFondoSoles"]
+
+        # Calcular semana del mes
+        if "FechaOperacion" in df.columns and not df["FechaOperacion"].isna().all():
+            df["MesSemana"] = (
+                df["FechaOperacion"]
+                .apply(self._calcular_semana_mes)
+                .apply(lambda w: f"Semana {w}")
             )
-            df["IngresosSoles"] = df["Ingresos"] * factor
+        else:
+            df["MesSemana"] = "Semana 1"
 
-            # 🔍 DEBUG DESPUÉS DE INGRESOS
-            liq_after_ingresos = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS ingresos: {len(liq_after_ingresos)} registros")
+        return df
 
-            # Calcular costos de fondeo
-            cost_rate = np.where(
-                df["Moneda"] == "PEN", self.INTERESES_PEN, self.INTERESES_USD
-            )
-            df["CostosFondo"] = ((1 + cost_rate) ** (df["DiasEfectivo"] / 365) - 1) * df[
-                "MontoDesembolso"
-            ]
-            df["CostosFondoSoles"] = df["CostosFondo"] * factor
-
-            # 🔍 DEBUG DESPUÉS DE COSTOS
-            liq_after_costos = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS costos: {len(liq_after_costos)} registros")
-
-            # Totales y utilidad
-            df["TotalIngresos"] = df["ComisionEstructuracionConIGV"] / 1.18 + df["Interes"]
-            df["TotalIngresosSoles"] = df["TotalIngresos"] * factor
-            df["Utilidad"] = df["TotalIngresosSoles"] - df["CostosFondoSoles"]
-
-            # 🔍 DEBUG DESPUÉS DE UTILIDAD
-            liq_after_utilidad = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 DESPUÉS utilidad: {len(liq_after_utilidad)} registros")
-
-            # Calcular semana del mes
-            if "FechaOperacion" in df.columns and not df["FechaOperacion"].isna().all():
-                df["MesSemana"] = (
-                    df["FechaOperacion"]
-                    .apply(self._calcular_semana_mes)
-                    .apply(lambda w: f"Semana {w}")
-                )
-            else:
-                df["MesSemana"] = "Semana 1"
-
-            # 🔍 DEBUG FINAL
-            liq_final = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 FINAL en función: {len(liq_final)} registros")
-
-            return df
     def _convertir_fechas(
         self, df: pd.DataFrame, columns: List[str], fmt: str = None
     ) -> pd.DataFrame:
