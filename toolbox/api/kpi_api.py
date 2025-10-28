@@ -113,7 +113,9 @@ class KPIAPI:
             # 2. Validar columnas mínimas
             df = self._validator.validar_columnas_minimas(df)
             logger("Validación de columnas mínimas completada")
-
+            
+            liq_2510000109_after_ws = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
+            logger.info(f"🔍 LIQ2510000109 después WebService: {len(liq_2510000109_after_ws)} registros")
             # 3. Obtener operaciones fuera del sistema
             df_fuera = (
                 self._operaciones_fuera_sistema_api.get_operaciones_fuera_sistema(
@@ -153,7 +155,11 @@ class KPIAPI:
             logger(
                 f"Validación Pydantic completada: {len(validated_data)} registros válidos"
             )
-
+            
+            validated_df = pd.DataFrame(validated_data)
+            liq_2510000109_final = validated_df[validated_df['CodigoLiquidacion'] == 'LIQ2510000109']
+            logger.info(f"🔍 LIQ2510000109 FINAL: {len(liq_2510000109_final)} registros")
+            
             if as_df:
                 return pd.DataFrame(validated_data)
 

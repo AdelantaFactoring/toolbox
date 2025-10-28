@@ -31,6 +31,8 @@ class KPIClient(BaseClient):
         tipo_reporte: int = 2,
     ) -> List[Dict[str, Any]]:
         try:
+            logger.info(f"Llamando WebService: {start_date} a {end_date}")
+            
             data = await self._obtener_data_con_autenticacion(
                 url=V2Settings.get_kpi_colocaciones_url(),
                 params={
@@ -41,19 +43,24 @@ class KPIClient(BaseClient):
                 },
             )
 
-            # 🔍 BUSCAR ESPECÍFICAMENTE LIQ2510000109
-            liq_2510000109_records = [r for r in data if r.get('CodigoLiquidacion') == 'LIQ2510000109']
-            logger.info(f"🔍 LIQ2510000109 en datos crudos: {len(liq_2510000109_records)} registros")
+            # DEBUG CRÍTICO - DATOS CRUDOS DEL WEBSERVICE
+            logger.info(f"📥 Datos CRUDOS del WebService: {len(data)} registros")
             
-            for record in liq_2510000109_records:
-                logger.info(f"📋 LIQ2510000109 - Doc: {record.get('NroDocumento')}, "
+            # Buscar LIQ2510000109 en datos CRUDOS
+            liq_2510000109_raw = [r for r in data if r.get('CodigoLiquidacion') == 'LIQ2510000109']
+            logger.info(f"🔍 LIQ2510000109 en datos CRUDOS: {len(liq_2510000109_raw)} registros")
+            
+            for i, record in enumerate(liq_2510000109_raw):
+                logger.info(f"LIQ2510000109 CRUDO [{i+1}] - "
+                        f"Documento: {record.get('NroDocumento')}, "
                         f"Neto: {record.get('NetoConfirmado')}, "
+                        f"Desembolso: {record.get('MontoDesembolso')}, "
                         f"Fecha: {record.get('FechaOperacion')}")
 
             return data
 
         except Exception as e:
-            logger.error(f"❌ Error obteniendo colocaciones: {e}")
+            logger.error(f"Error obteniendo colocaciones: {e}")
             raise
 
     async def _obtener_data_con_autenticacion(

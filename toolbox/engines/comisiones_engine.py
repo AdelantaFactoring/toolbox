@@ -226,10 +226,8 @@ class ComisionesEngine(BaseEngine):
             # Umbral ajustable (e.g., 60)
             if best_score >= 60:
                 return best_match
-            # Si no se encuentra un parecido aceptable, se registra un warning
-            logger(
-                f"No se encontró mapeo adecuado para '{candidate}' (mejor score: {best_score})"
-            )
+
+            
             return candidate
 
         referidos_df = referidos_df.copy()
