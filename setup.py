@@ -22,7 +22,7 @@ else:
 
 setup(
     name="adelanta-toolbox",
-    version="1.0.8",
+    version="1.0.9",
     author="Jimmy",
     author_email="",  # Agrega tu email aquí
     description="Librería con arquitectura hexagonal para procesos financieros ETL",
