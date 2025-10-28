@@ -141,6 +141,9 @@ class KPITransformer(BaseTransformer):
         """Calcula métricas financieras, ingresos, costos y utilidades"""
         df = df.copy()
 
+        liq_before_merge = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
+        logger(f" LIQ2510000109 ANTES de merge: {len(liq_before_merge)} registros")
+
         # Convertir columnas numéricas
         columnas_numericas = [
             "NetoConfirmado",
@@ -176,6 +179,9 @@ class KPITransformer(BaseTransformer):
             right_on="TipoCambioFecha",
             how="left",
         )
+        liq_after_tc_merge = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
+        logger(f" LIQ2510000109 DESPUÉS merge tipo cambio: {len(liq_after_tc_merge)} registros")
+
         df = df.merge(sector_df, on="RUCPagador", how="left")
         df["GrupoEco"] = df["GrupoEco"].fillna(df["RazonSocialPagador"])
 

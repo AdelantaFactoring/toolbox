@@ -75,6 +75,29 @@ class KPIAPI:
         tipo_reporte: int = 2,
         as_df: bool = False,
     ) -> Union[pd.DataFrame, List[Dict]]:
+        """
+        Flujo principal completo de KPI:
+        1. Obtener colocaciones via webservice
+        2. Validar columnas y tipos mínimos
+        3. Obtener operaciones fuera del sistema
+        4. Enriquecer con operaciones fuera de sistema
+        5. Formatear campos y fechas
+        6. Obtener datos de referidos
+        7. Enriquecer con referidos
+        8. Obtener datos de sector pagadores
+        9. Calcular métricas financieras
+        10. Validación Pydantic y serialización
+
+        Args:
+            start_date: Fecha de inicio del período
+            end_date: Fecha de fin del período
+            fecha_corte: Fecha de corte para el cálculo
+            tipo_reporte: Tipo de reporte (0=acumulado, 2=normal)
+            as_df: Si True devuelve DataFrame, si False lista de dicts
+
+        Returns:
+            DataFrame o lista de diccionarios con KPIs calculados
+        """
         logger(
             f"Iniciando cálculo KPI completo: {start_date} a {end_date}, tipo_reporte={tipo_reporte}"
         )
@@ -90,9 +113,6 @@ class KPIAPI:
             # 2. Validar columnas mínimas
             df = self._validator.validar_columnas_minimas(df)
             logger("Validación de columnas mínimas completada")
-            
-            liq_2510000109_after_ws = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 después WebService: {len(liq_2510000109_after_ws)} registros")
 
             # 3. Obtener operaciones fuera del sistema
             df_fuera = (
@@ -106,16 +126,10 @@ class KPIAPI:
                 df, df_fuera, tipo_reporte
             )
             logger("Enriquecimiento con operaciones fuera del sistema completado")
-            
-            liq_2510000109_after_fuera = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 después operaciones fuera: {len(liq_2510000109_after_fuera)} registros")
 
             # 5. Formatear campos
             df = self._transformer.formatear_campos(df)
             logger("Formateo de campos completado")
-            
-            liq_2510000109_after_formateo = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 después formateo: {len(liq_2510000109_after_formateo)} registros")
 
             # 6. Obtener datos de referidos
             referidos_df = self._referidos_api.get_referidos(as_df=True)
@@ -123,9 +137,6 @@ class KPIAPI:
             # 7. Enriquecer con referidos
             df = await self._enriquecer_referidos(df=df, referidos_df=referidos_df)
             logger("Enriquecimiento con referidos completado")
-            
-            liq_2510000109_after_referidos = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 después referidos: {len(liq_2510000109_after_referidos)} registros")
 
             # 8. Obtener datos de sector pagadores
             sector_pagadores_df = self._sector_pagadores_api.get_sectores_pagadores(
@@ -136,19 +147,12 @@ class KPIAPI:
             # 9. Calcular KPIs financieros
             df = await self._calcular_metricas_financieras(df, sector_pagadores_df)
             logger("Cálculo de métricas financieras completado")
-            
-            liq_2510000109_after_metricas = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 después métricas: {len(liq_2510000109_after_metricas)} registros")
 
             # 10. Validación final y serialización
             validated_data = self._validator.validar_schema_kpi(df, tipo_reporte)
             logger(
                 f"Validación Pydantic completada: {len(validated_data)} registros válidos"
             )
-
-            validated_df = pd.DataFrame(validated_data)
-            liq_2510000109_final = validated_df[validated_df['CodigoLiquidacion'] == 'LIQ2510000109']
-            logger(f"🔍 LIQ2510000109 FINAL: {len(liq_2510000109_final)} registros")
 
             if as_df:
                 return pd.DataFrame(validated_data)
@@ -272,11 +276,17 @@ class KPIAPI:
         """Calcula métricas financieras usando otros engines"""
         try:
 
+            liq_before = df[df['CodigoLiquidacion'] == 'LIQ2510000109']
+            logger(f"🔍 LIQ2510000109 AL INICIO de métricas: {len(liq_before)} registros")
+            
             # Calcular KPIs financieros
             df_con_kpis = self._transformer.calcular_kpis_financieros(
                 df, self.tipo_cambio_df, sector_pagadores_df
             )
 
+            liq_after = df_con_kpis[df_con_kpis['CodigoLiquidacion'] == 'LIQ2510000109']
+            logger(f"🔍 LIQ2510000109 AL FINAL de métricas: {len(liq_after)} registros")
+            
             logger(f"Métricas financieras calculadas para {len(df_con_kpis)} registros")
             return df_con_kpis
 
