@@ -9,6 +9,7 @@ Documentación:
 Uso básico:
     from toolbox.api.kpi_api import get_kpi
     from toolbox.api.comisiones_api import ComisionesCalcular
+    from toolbox.api.liquidaciones_api import obtener_datos_para_powerbi  # NUEVO
 """
 
 __version__ = "0.5.0"
@@ -41,6 +42,19 @@ except ImportError as e:
         f"Módulos fondo crecer V2 requieren dependencias de imports relativos: {e}"
     )
 
+# NUEVO: Módulo de liquidaciones
+try:
+    from .toolbox.api.liquidaciones_api import (
+        LiquidacionesAPI,
+        procesar_liquidaciones_completo,
+        obtener_datos_para_powerbi,
+        obtener_reporte_completo
+    )
+except ImportError as e:
+    raise ImportError(
+        f"Módulos liquidaciones V2 requieren dependencias de imports relativos: {e}"
+    )
+
 # Aliases para compatibilidad y API simple
 __all__ = [
     # Comisiones
@@ -48,6 +62,11 @@ __all__ = [
     # Fondos individuales
     "FondoPromocionalAPI",
     "get_fondo_promocional",
-    "FondoCrecerAPI",
+    "FondoCrecerAPI", 
     "get_fondo_crecer",
+    # NUEVO: Liquidaciones
+    "LiquidacionesAPI",
+    "procesar_liquidaciones_completo",
+    "obtener_datos_para_powerbi",
+    "obtener_reporte_completo",
 ]
