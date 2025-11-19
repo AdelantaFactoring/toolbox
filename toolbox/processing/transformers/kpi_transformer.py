@@ -124,7 +124,7 @@ class KPITransformer(BaseTransformer):
             df["TasaNominalMensualPorc"], errors="coerce"
         ).fillna(0)
         df["TasaNominalMensualPorc"] = df["TasaNominalMensualPorc"].apply(
-            lambda x: x / 100 if x >= 0 else x
+            lambda x: x / 100
         )
 
         # Crear campos temporales
