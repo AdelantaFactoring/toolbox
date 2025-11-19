@@ -1326,7 +1326,7 @@ wheels = [
 
 [[package]]
 name = "httpcore"
-version = "1.0.9"
+version = "1.0.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },

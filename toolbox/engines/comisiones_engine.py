@@ -923,7 +923,7 @@ class ComisionesEngine(BaseEngine):
         # Clasificación de ejecutivos
         ejecutivos_externos = list(TASAS_EJECUTIVOS_EXTERNOS.keys())
         ejecutivos_especiales = ["Ricardo Franco", "Red, Capital"]
-        ejecutivos_referencia = ["RED CAPITAL"]
+        ejecutivos_referencia = ["RED CAPITAL", "RICARDO"]
 
         # Inicializar columna de comisiones
         df["Comision"] = 0.0
