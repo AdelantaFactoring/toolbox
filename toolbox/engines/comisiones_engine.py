@@ -226,8 +226,10 @@ class ComisionesEngine(BaseEngine):
             # Umbral ajustable (e.g., 60)
             if best_score >= 60:
                 return best_match
-
-            
+            # Si no se encuentra un parecido aceptable, se registra un warning
+            logger(
+                f"No se encontró mapeo adecuado para '{candidate}' (mejor score: {best_score})"
+            )
             return candidate
 
         referidos_df = referidos_df.copy()
@@ -927,6 +929,8 @@ class ComisionesEngine(BaseEngine):
 
         # Inicializar columna de comisiones
         df["Comision"] = 0.0
+        logger("Calculando comisiones...")
+        df["Tasa"] = 0.0    
 
         # VECTORIZACIÓN COMPLETA CON NP.SELECT
 
@@ -945,6 +949,7 @@ class ComisionesEngine(BaseEngine):
             comision_especiales = (interes_soles - df["CostosFondoSoles"]) * 0.06
 
             df.loc[especiales_mask, "Comision"] = comision_especiales[especiales_mask]
+            df.loc[especiales_mask, "Tasa"] = 0.06
 
         # 2. Ejecutivos externos (por columna Ejecutivo)
         for ejecutivo, tasa in TASAS_EJECUTIVOS_EXTERNOS.items():
@@ -957,6 +962,7 @@ class ComisionesEngine(BaseEngine):
                     df["ComisionEstructuracionConIGV"] / IGV_FACTOR,
                 )
                 df.loc[externos_mask, "Comision"] = comision_externos[externos_mask]
+                df.loc[externos_mask, "Tasa"] = tasa
 
         # 3. Ejecutivos internos (todos los que no son externos ni especiales)
         internos_mask = ~df["Ejecutivo"].isin(ejecutivos_externos) & ~df[
@@ -981,7 +987,8 @@ class ComisionesEngine(BaseEngine):
 
             # Aplicar tasas solo a ejecutivos internos
             tasas_internos = np.select(conditions, choices, default=0.06)
-            comision_internos = tasas_internos * df["UtilidadTotalSoles"]
+            comision_internos = np.select(conditions, choices, default=0.06) * df["UtilidadTotalSoles"]
             df.loc[internos_mask, "Comision"] = comision_internos[internos_mask]
+            df.loc[internos_mask, "Tasa"] = tasas_internos[internos_mask]
 
         return df
