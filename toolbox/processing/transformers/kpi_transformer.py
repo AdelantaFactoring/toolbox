@@ -123,7 +123,9 @@ class KPITransformer(BaseTransformer):
         df["TasaNominalMensualPorc"] = pd.to_numeric(
             df["TasaNominalMensualPorc"], errors="coerce"
         ).fillna(0)
-  
+        df["TasaNominalMensualPorc"] = df["TasaNominalMensualPorc"].apply(
+            lambda x: x / 100 if x >= 1 else x / 10
+        )
 
         # Crear campos temporales
         if "FechaOperacion" in df.columns and not df["FechaOperacion"].isna().all():
