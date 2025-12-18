@@ -65,6 +65,7 @@ class ComisionesEngine(BaseEngine):
         "FRANCO": "Franco, Moreano",
         "FABIOLA": "Fabiola, Farro",
         "ROSELYS": "Roselys, Acosta",
+        "SOFIA":  "Sofia, Villar",
     }
 
     def __init__(self):
